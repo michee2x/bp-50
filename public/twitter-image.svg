@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-labelledby="title desc">
+  <title id="title">BrandPawa Twitter preview</title>
+  <desc id="desc">BrandPawa summary large image for social sharing.</desc>
+  <defs>
+    <linearGradient id="bg" x1="10%" y1="0%" x2="90%" y2="100%">
+      <stop offset="0%" stop-color="#1b1230" />
+      <stop offset="55%" stop-color="#4c2990" />
+      <stop offset="100%" stop-color="#f06b8f" />
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)" />
+  <rect x="72" y="72" width="1056" height="486" rx="40" fill="#ffffff" fill-opacity="0.08" stroke="#ffffff" stroke-opacity="0.18" />
+  <text x="118" y="146" fill="#f4ddff" fill-opacity="0.9" font-size="24" font-family="Arial, Helvetica, sans-serif" letter-spacing="4">BRAND DIAGNOSTICS + CHALLENGES</text>
+  <text x="118" y="244" fill="#ffffff" font-size="72" font-weight="700" font-family="Arial, Helvetica, sans-serif">Build Your Dominant Brand</text>
+  <text x="118" y="306" fill="#ffffff" fill-opacity="0.86" font-size="30" font-family="Arial, Helvetica, sans-serif">Measure your score. Discover your color power. Build momentum daily.</text>
+  <g transform="translate(118 374)">
+    <rect width="302" height="124" rx="28" fill="#120d21" fill-opacity="0.28" />
+    <text x="36" y="48" fill="#f3d6ff" fill-opacity="0.82" font-size="22" font-family="Arial, Helvetica, sans-serif">BrandPawa Score</text>
+    <text x="36" y="90" fill="#ffffff" font-size="40" font-weight="700" font-family="Arial, Helvetica, sans-serif">See where you stand</text>
+  </g>
+  <g transform="translate(450 374)">
+    <rect width="302" height="124" rx="28" fill="#120d21" fill-opacity="0.28" />
+    <text x="36" y="48" fill="#f3d6ff" fill-opacity="0.82" font-size="22" font-family="Arial, Helvetica, sans-serif">Color Power</text>
+    <text x="36" y="90" fill="#ffffff" font-size="40" font-weight="700" font-family="Arial, Helvetica, sans-serif">Find your edge</text>
+  </g>
+  <g transform="translate(782 374)">
+    <rect width="302" height="124" rx="28" fill="#120d21" fill-opacity="0.28" />
+    <text x="36" y="48" fill="#f3d6ff" fill-opacity="0.82" font-size="22" font-family="Arial, Helvetica, sans-serif">Challenges</text>
+    <text x="36" y="90" fill="#ffffff" font-size="40" font-weight="700" font-family="Arial, Helvetica, sans-serif">Grow with action</text>
+  </g>
+  <text x="1082" y="536" fill="#ffffff" fill-opacity="0.84" font-size="28" font-weight="700" text-anchor="end" font-family="Arial, Helvetica, sans-serif">BrandPawa</text>
+</svg>

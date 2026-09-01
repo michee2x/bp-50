@@ -1,0 +1,220 @@
+@import "tailwindcss";
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background:
+    radial-gradient(circle at top left, rgba(216, 180, 254, 0.3), transparent 32%),
+    linear-gradient(180deg, #fffafc 0%, #ffffff 34%, #f8fafc 100%);
+  color: #0f172a;
+}
+
+a {
+  text-decoration: none;
+}
+
+.site-shell {
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at top right, rgba(244, 114, 182, 0.12), transparent 26%),
+    radial-gradient(circle at top left, rgba(59, 130, 246, 0.08), transparent 28%);
+}
+
+.site-nav {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  border-bottom: 1px solid rgba(226, 232, 240, 0.75);
+  background: rgba(255, 250, 252, 0.66);
+  backdrop-filter: blur(20px);
+}
+
+.site-container {
+  margin: 0 auto;
+  width: 100%;
+  max-width: 80rem;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+.site-nav-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  min-height: 4.75rem;
+}
+
+.site-nav-brand {
+  display: flex;
+  align-items: center;
+}
+
+.site-nav-desktop {
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex: 1;
+  margin-left: 1.5rem;
+}
+
+.site-nav-links-shell {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  border: 1px solid rgba(226, 232, 240, 0.95);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 12px 34px rgba(15, 23, 42, 0.06);
+  padding: 0.45rem;
+  max-width: 100%;
+}
+
+.site-nav-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.6rem;
+  border-radius: 999px;
+  color: #475569;
+  font-size: 0.95rem;
+  font-weight: 600;
+  padding: 0 0.95rem;
+  transition: color 160ms ease, background-color 160ms ease;
+}
+
+.site-nav-link:hover {
+  background: #faf5ff;
+  color: #7c3aed;
+}
+
+.site-nav-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-shrink: 0;
+}
+
+.site-nav-group {
+  position: relative;
+}
+
+.site-nav-group:hover .site-nav-dropdown {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+
+.site-nav-dropdown {
+  position: absolute;
+  top: calc(100% + 0.9rem);
+  left: 0;
+  min-width: 14rem;
+  border: 1px solid rgba(226, 232, 240, 0.95);
+  border-radius: 1rem;
+  background: rgba(255, 255, 255, 0.97);
+  box-shadow: 0 18px 48px rgba(15, 23, 42, 0.12);
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(6px);
+  transition: opacity 160ms ease, transform 160ms ease;
+  padding: 0.5rem;
+}
+
+.site-nav-dropdown-link {
+  display: block;
+  border-radius: 0.8rem;
+  color: #334155;
+  font-size: 0.92rem;
+  font-weight: 500;
+  padding: 0.7rem 0.85rem;
+  transition: background-color 160ms ease, color 160ms ease;
+}
+
+.site-nav-dropdown-link:hover {
+  background: #faf5ff;
+  color: #7c3aed;
+}
+
+.site-primary-button,
+.site-ghost-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-radius: 999px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  min-height: 2.9rem;
+  padding: 0.8rem 1.25rem;
+  transition:
+    transform 160ms ease,
+    box-shadow 160ms ease,
+    background-color 160ms ease,
+    color 160ms ease;
+}
+
+.site-primary-button {
+  background: linear-gradient(135deg, #7c3aed 0%, #ec4899 100%);
+  box-shadow: 0 14px 30px rgba(124, 58, 237, 0.18);
+  color: white;
+}
+
+.site-primary-button:hover {
+  transform: translateY(-1px);
+}
+
+.site-ghost-button {
+  border: 1px solid rgba(196, 181, 253, 0.7);
+  background: white;
+  color: #7c3aed;
+}
+
+.site-ghost-button:hover {
+  background: #faf5ff;
+}
+
+.site-section {
+  padding: 4rem 0;
+}
+
+.site-card {
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  border-radius: 1.5rem;
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 14px 40px rgba(15, 23, 42, 0.06);
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.2s ease-out;
+}
+
+@media (min-width: 640px) {
+  .site-container {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+
+  .site-section {
+    padding: 5rem 0;
+  }
+}
+
+@media (min-width: 1024px) {
+  .site-nav-row {
+    min-height: 5.25rem;
+  }
+}

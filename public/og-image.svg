@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-labelledby="title desc">
+  <title id="title">BrandPawa social preview</title>
+  <desc id="desc">BrandPawa diagnostics, challenges, and brand growth platform preview image.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#24133d" />
+      <stop offset="50%" stop-color="#5b2bb1" />
+      <stop offset="100%" stop-color="#ea5a96" />
+    </linearGradient>
+    <radialGradient id="glowA" cx="0%" cy="0%" r="100%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.3" />
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0" />
+    </radialGradient>
+    <radialGradient id="glowB" cx="100%" cy="20%" r="100%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.2" />
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0" />
+    </radialGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)" />
+  <circle cx="170" cy="520" r="210" fill="url(#glowA)" />
+  <circle cx="1000" cy="120" r="220" fill="url(#glowB)" />
+  <rect x="76" y="64" width="1048" height="502" rx="34" fill="#120d21" fill-opacity="0.18" stroke="#ffffff" stroke-opacity="0.16" />
+  <text x="118" y="136" fill="#f4ddff" fill-opacity="0.88" font-size="24" font-family="Arial, Helvetica, sans-serif" letter-spacing="5">BUILD YOUR DOMINANT BRAND</text>
+  <text x="118" y="238" fill="#ffffff" font-size="74" font-weight="700" font-family="Arial, Helvetica, sans-serif">BrandPawa</text>
+  <text x="118" y="302" fill="#ffffff" fill-opacity="0.88" font-size="30" font-family="Arial, Helvetica, sans-serif">Diagnostics, challenge systems, and clarity for brands</text>
+  <text x="118" y="342" fill="#ffffff" fill-opacity="0.88" font-size="30" font-family="Arial, Helvetica, sans-serif">that want stronger visibility, trust, and momentum.</text>
+  <g transform="translate(118 390)">
+    <rect width="236" height="104" rx="24" fill="#ffffff" fill-opacity="0.12" />
+    <text x="34" y="40" fill="#f2d8ff" fill-opacity="0.8" font-size="21" font-family="Arial, Helvetica, sans-serif">Diagnostics</text>
+    <text x="34" y="76" fill="#ffffff" font-size="34" font-weight="700" font-family="Arial, Helvetica, sans-serif">Score + Color</text>
+  </g>
+  <g transform="translate(378 390)">
+    <rect width="236" height="104" rx="24" fill="#ffffff" fill-opacity="0.12" />
+    <text x="34" y="40" fill="#f2d8ff" fill-opacity="0.8" font-size="21" font-family="Arial, Helvetica, sans-serif">Progress</text>
+    <text x="34" y="76" fill="#ffffff" font-size="34" font-weight="700" font-family="Arial, Helvetica, sans-serif">Live Results</text>
+  </g>
+  <g transform="translate(638 390)">
+    <rect width="236" height="104" rx="24" fill="#ffffff" fill-opacity="0.12" />
+    <text x="34" y="40" fill="#f2d8ff" fill-opacity="0.8" font-size="21" font-family="Arial, Helvetica, sans-serif">Growth</text>
+    <text x="34" y="76" fill="#ffffff" font-size="34" font-weight="700" font-family="Arial, Helvetica, sans-serif">Brand Challenges</text>
+  </g>
+  <text x="1080" y="534" fill="#ffffff" fill-opacity="0.82" font-size="28" font-weight="700" text-anchor="end" font-family="Arial, Helvetica, sans-serif">brandpawa.com</text>
+</svg>
