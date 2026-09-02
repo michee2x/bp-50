@@ -54,7 +54,25 @@ const startFlowGoalOptions: Array<{ value: StartFlowGoal; label: string }> = [
   { value: 'positioning', label: 'Positioning' },
   { value: 'visibility', label: 'Visibility' },
 ];
+const Modal = ({ isOpen, onClose, children }: any) => {
+    if (!isOpen) return null;
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.42),_transparent_25%),rgba(250,240,255,0.72)] p-4 backdrop-blur-md">
+        <div className="relative max-h-[90vh] w-full max-w-md overflow-y-auto rounded-2xl border border-white/80 bg-white/92 shadow-2xl backdrop-blur">
+          <button
+            onClick={onClose}
+            className="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
+          >
+            <FiX size={24} />
+          </button>
+          {children}
+        </div>
+      </div>
+    );
+  };
 
+
+  
 export default function HomePage() {
   type ContactFormState = {
     name: string;
@@ -581,22 +599,7 @@ export default function HomePage() {
     setWaitlistEmail('');
   };
 
-  const Modal = ({ isOpen, onClose, children }: any) => {
-    if (!isOpen) return null;
-    return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.42),_transparent_25%),rgba(250,240,255,0.72)] p-4 backdrop-blur-md">
-        <div className="relative max-h-[90vh] w-full max-w-md overflow-y-auto rounded-2xl border border-white/80 bg-white/92 shadow-2xl backdrop-blur">
-          <button
-            onClick={onClose}
-            className="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
-          >
-            <FiX size={24} />
-          </button>
-          {children}
-        </div>
-      </div>
-    );
-  };
+  
 
   return (
     <div className="site-shell text-gray-800">
