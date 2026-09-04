@@ -165,7 +165,7 @@ export default function OnboardingTour({
     };
   }, [isOpen, step, onStepSectionChange]);
 
-  const syncTargetRect = () => {
+  function syncTargetRect() {
     const element = activeElementRef.current;
     if (!element) {
       setTargetRect(null);
@@ -173,9 +173,9 @@ export default function OnboardingTour({
     }
 
     setTargetRect(element.getBoundingClientRect());
-  };
+  }
 
-  const locateStepTarget = () => {
+  function locateStepTarget() {
     if (!step) return;
 
     if (step.id === 'welcome') {

@@ -243,35 +243,6 @@ export default function Dashboard() {
 
   const normalizedSearchQuery = searchQuery.trim().toLowerCase();
 
-  // Check environment variables
-  if (!supabaseUrl || !supabaseAnonKey) {
-    return (
-      <div className="min-h-screen bg-[#FAF0FF] flex items-center justify-center p-4">
-        <div className="max-w-md p-4 sm:p-6 bg-white rounded-xl shadow-lg text-center w-full mx-4">
-          <div className="w-12 h-12 sm:w-16 sm:h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
-            <FiAlertCircle className="text-red-600 text-xl sm:text-2xl" />
-          </div>
-          <h2 className="text-lg sm:text-xl font-bold mb-2 px-2">Configuration Required</h2>
-          <p className="text-gray-600 text-sm sm:text-base mb-3 sm:mb-4">
-            Supabase environment variables are missing.
-          </p>
-          <div className="text-left bg-gray-50 p-3 rounded-lg mb-3 sm:mb-4">
-            <p className="text-xs sm:text-sm font-medium mb-1 sm:mb-2">Add to .env.local:</p>
-            <code className="text-xs bg-gray-100 p-2 rounded block overflow-x-auto">
-              NEXT_PUBLIC_SUPABASE_URL=your_project_url<br />
-              NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
-            </code>
-          </div>
-          <button
-            onClick={() => window.location.reload()}
-            className="px-4 py-2 sm:px-6 sm:py-3 bg-purple-600 text-white rounded-lg font-semibold hover:bg-purple-700 transition text-sm sm:text-base w-full sm:w-auto"
-          >
-            Retry
-          </button>
-        </div>
-      </div>
-    );
-  }
 
   // Check user on mount
   useEffect(() => {
@@ -2299,6 +2270,36 @@ export default function Dashboard() {
         return renderOverview();
     }
   };
+
+  // Check environment variables
+  if (!supabaseUrl || !supabaseAnonKey) {
+    return (
+      <div className="min-h-screen bg-[#FAF0FF] flex items-center justify-center p-4">
+        <div className="max-w-md p-4 sm:p-6 bg-white rounded-xl shadow-lg text-center w-full mx-4">
+          <div className="w-12 h-12 sm:w-16 sm:h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
+            <FiAlertCircle className="text-red-600 text-xl sm:text-2xl" />
+          </div>
+          <h2 className="text-lg sm:text-xl font-bold mb-2 px-2">Configuration Required</h2>
+          <p className="text-gray-600 text-sm sm:text-base mb-3 sm:mb-4">
+            Supabase environment variables are missing.
+          </p>
+          <div className="text-left bg-gray-50 p-3 rounded-lg mb-3 sm:mb-4">
+            <p className="text-xs sm:text-sm font-medium mb-1 sm:mb-2">Add to .env.local:</p>
+            <code className="text-xs bg-gray-100 p-2 rounded block overflow-x-auto">
+              NEXT_PUBLIC_SUPABASE_URL=your_project_url<br />
+              NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
+            </code>
+          </div>
+          <button
+            onClick={() => window.location.reload()}
+            className="px-4 py-2 sm:px-6 sm:py-3 bg-purple-600 text-white rounded-lg font-semibold hover:bg-purple-700 transition text-sm sm:text-base w-full sm:w-auto"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   // Loading state
   if (initialLoading) {

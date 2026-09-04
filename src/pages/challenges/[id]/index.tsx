@@ -118,14 +118,8 @@ export default function ChallengeDetails() {
     checkUser();
   }, []);
 
-  // Fetch challenge data when user and challenge ID are available
-  useEffect(() => {
-    if (user && id) {
-      fetchChallengeData();
-    }
-  }, [user, id]);
 
-  const checkUser = async () => {
+  async function checkUser() {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
@@ -214,7 +208,14 @@ export default function ChallengeDetails() {
     }
   }, [user, id]);
 
-  const fetchTasksForDuration = async (durationId: string) => {
+  // Fetch challenge data when user and challenge ID are available
+  useEffect(() => {
+    if (user && id) {
+      fetchChallengeData();
+    }
+  }, [user, id, fetchChallengeData]);
+
+  async function fetchTasksForDuration(durationId: string) {
     try {
       const { data: tasksData, error: tasksError } = await supabase
         .from('challenge_tasks')
@@ -243,7 +244,7 @@ export default function ChallengeDetails() {
     }
   };
 
-  const calculateChallengeStats = async (userChallenge: UserChallenge) => {
+  async function calculateChallengeStats(userChallenge: UserChallenge) {
     try {
       const totalTasks = tasks.length;
       const completedTasksCount = userChallenge.completed_days?.length || 0;

@@ -1718,13 +1718,13 @@ export default function HomePage() {
               />
               <span className="text-gray-600">
                 I agree to the{' '}
-                <a href="/terms" className="text-purple-600 hover:text-purple-700">
+                <Link href="/terms" className="text-purple-600 hover:text-purple-700">
                   Terms of Service
-                </a>{' '}
+                </Link>{' '}
                 and{' '}
-                <a href="/privacy" className="text-purple-600 hover:text-purple-700">
+                <Link href="/privacy" className="text-purple-600 hover:text-purple-700">
                   Privacy Policy
-                </a>
+                </Link>
               </span>
             </label>
             

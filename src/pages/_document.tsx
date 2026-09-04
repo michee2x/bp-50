@@ -6,7 +6,6 @@ class MyDocument extends Document {
     return (
       <Html lang="en">
         <Head>
-          <title>BrandPawa - Build Your Dominant Brand</title>
           <meta property="og:title" content="BrandPawa - Build Your Dominant Brand" />
           <meta name="twitter:title" content="BrandPawa - Build Your Dominant Brand" />
           <link rel="icon" href="/favicon.ico" />
