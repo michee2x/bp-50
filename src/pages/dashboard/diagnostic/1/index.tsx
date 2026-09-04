@@ -162,6 +162,37 @@ export default function BrandPawaScoreDiagnostic() {
     checkUser();
   }, []);
 
+  useEffect(() => {
+    if (router.isReady && user) {
+      if (router.query.migrate === 'true') {
+        const saved = localStorage.getItem('brandpawa_onboarding_answers');
+        if (saved) {
+          try {
+            console.log('🔄 Migrating onboarding answers to Supabase...');
+            const parsed = JSON.parse(saved);
+            
+            // Set the state
+            setAnswers(parsed);
+            setCurrentQuestion(Object.keys(parsed).length);
+            
+            // Clean up localStorage immediately so we don't loop
+            localStorage.removeItem('brandpawa_onboarding_answers');
+            
+            // If they answered all 10 questions, save immediately
+            if (Object.keys(parsed).length === questions.length) {
+              calculateResults(parsed);
+            }
+          } catch (e) {
+            console.error('Failed to parse onboarding answers for migration', e);
+          }
+        }
+        
+        // Remove migrate param to clean up URL
+        router.replace('/dashboard/diagnostic/1', undefined, { shallow: true });
+      }
+    }
+  }, [router.isReady, router.query, user]);
+
   const checkUser = async () => {
     console.log('Starting user check...');
     const { data: { user: authUser }, error } = await supabase.auth.getUser();

@@ -237,6 +237,17 @@ export default function HomePage() {
   }, []);
 
   useEffect(() => {
+    if (router.isReady) {
+      if (router.query.auth === 'signup') {
+        setIsSignupModalOpen(true);
+      } else if (router.query.auth === 'login') {
+        setIsLoginModalOpen(true);
+      }
+    }
+  }, [router.isReady, router.query.auth]);
+
+
+  useEffect(() => {
     if (!sessionUser) return;
 
     const savedStartFlow = readStartFlowState();
@@ -663,14 +674,14 @@ export default function HomePage() {
                 </div>
                 <div className="mt-6 flex flex-col gap-3 sm:flex-row">
                   <button
-                    onClick={() => openStartFlow('test')}
+                    onClick={() => router.push('/onboarding')}
                     className="site-primary-button justify-center sm:justify-start"
                   >
                     <span>Take the BrandPawa Test</span>
                     <FiArrowRight className="transition-transform group-hover:translate-x-1" />
                   </button>
                   <button
-                    onClick={() => openStartFlow('quiz')}
+                    onClick={() => router.push('/onboarding')}
                     className="site-ghost-button justify-center sm:justify-start"
                   >
                     <span>Start a Quiz</span>

@@ -345,6 +345,13 @@ export default function Dashboard() {
       console.log('✅ User authenticated:', authUser.id);
       setUser(authUser);
       
+      const savedOnboarding = localStorage.getItem('brandpawa_onboarding_answers');
+      if (savedOnboarding) {
+        console.log('🔄 Found onboarding answers, migrating...');
+        router.push('/dashboard/diagnostic/1?migrate=true');
+        return;
+      }
+      
       // Fetch all data in parallel
       await Promise.all([
         fetchProfile(authUser.id),
