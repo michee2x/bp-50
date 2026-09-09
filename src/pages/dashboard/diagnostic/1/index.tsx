@@ -170,14 +170,14 @@ export default function BrandPawaScoreDiagnostic() {
           try {
             console.log('🔄 Migrating onboarding answers to Supabase...');
             const parsed = JSON.parse(saved);
-            
+
             // Set the state
             setAnswers(parsed);
             setCurrentQuestion(Object.keys(parsed).length);
-            
+
             // Clean up localStorage immediately so we don't loop
             localStorage.removeItem('brandpawa_onboarding_answers');
-            
+
             // If they answered all 10 questions, save immediately
             if (Object.keys(parsed).length === questions.length) {
               calculateResults(parsed);
@@ -186,7 +186,7 @@ export default function BrandPawaScoreDiagnostic() {
             console.error('Failed to parse onboarding answers for migration', e);
           }
         }
-        
+
         // Remove migrate param to clean up URL
         router.replace('/dashboard/diagnostic/1', undefined, { shallow: true });
       }
@@ -196,16 +196,16 @@ export default function BrandPawaScoreDiagnostic() {
   const checkUser = async () => {
     console.log('Starting user check...');
     const { data: { user: authUser }, error } = await supabase.auth.getUser();
-    
+
     if (error || !authUser) {
       console.error('Auth error or no user:', error);
       router.push('/');
       return;
     }
-    
+
     console.log('User authenticated:', authUser.id);
     setUser(authUser);
-    
+
     try {
       const { count: historyCount, error: historyError } = await supabase
         .from('brand_score_history')
@@ -225,42 +225,36 @@ export default function BrandPawaScoreDiagnostic() {
         .select('*')
         .eq('id', authUser.id)
         .single();
-      
+
       if (profileError) {
         console.error('Profile fetch error:', profileError);
-        
-        // Create profile if it doesn't exist
-        const { data: newProfile, error: createError } = await supabase
-          .from('profiles')
-          .upsert({
+
+        // Create profile via backend API (bypasses auth race condition)
+        const createRes = await fetch('/api/sync-profile', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
             id: authUser.id,
             email: authUser.email,
             full_name: authUser.user_metadata?.full_name || authUser.email?.split('@')[0],
-            plan: 'free',
-            brand_score: 0,
-            brand_stage: 'Weak Pawa',
-            diagnostic_count: 0,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString()
-          }, {
-            onConflict: 'id'
+            plan: 'free'
           })
-          .select()
-          .single();
-        
-        if (createError) {
-          console.error('Profile creation error:', createError);
+        });
+
+        if (!createRes.ok) {
+          console.error('Profile creation error via API:', await createRes.text());
         } else {
-          console.log('Profile created:', newProfile);
-          setUserName(newProfile.full_name || authUser.email?.split('@')[0] || 'User');
-          setIsProUser(newProfile.plan === 'pro' || newProfile.plan === 'enterprise');
+          const fullName = authUser.user_metadata?.full_name || authUser.email?.split('@')[0] || 'User';
+          console.log('Profile created via API');
+          setUserName(fullName);
+          setIsProUser(false);
         }
       } else {
         console.log('Profile found:', profile);
         setUserName(profile.full_name || authUser.email?.split('@')[0] || 'User');
         setIsProUser(profile.plan === 'pro' || profile.plan === 'enterprise');
       }
-      
+
       // Check for existing completed result
       const { data: existingResult, error: resultError } = await supabase
         .from('user_diagnostics')
@@ -269,11 +263,11 @@ export default function BrandPawaScoreDiagnostic() {
         .eq('diagnostic_id', 1)
         .eq('is_completed', true)
         .single();
-      
+
       if (resultError && resultError.code !== 'PGRST116') {
         console.error('Existing result error:', resultError);
       }
-      
+
       if (existingResult) {
         console.log('Existing result found:', existingResult);
         setHasExistingResult(true);
@@ -286,7 +280,7 @@ export default function BrandPawaScoreDiagnostic() {
       } else {
         console.log('No existing result found');
       }
-      
+
       // Check for existing progress
       const { data: progressData, error: progressError } = await supabase
         .from('diagnostic_progress')
@@ -294,21 +288,21 @@ export default function BrandPawaScoreDiagnostic() {
         .eq('user_id', authUser.id)
         .eq('diagnostic_id', 1)
         .single();
-      
+
       if (progressError && progressError.code !== 'PGRST116') {
         console.error('Progress fetch error:', progressError);
       }
-      
+
       if (progressData) {
         console.log('Progress found:', progressData);
         setProgress(progressData);
         const savedAnswers = progressData.answers as Record<number, number> || {};
         setAnswers(savedAnswers);
-        
+
         // Set current question based on progress
         const answeredCount = Object.keys(savedAnswers).length;
         console.log('Answered questions:', answeredCount);
-        
+
         if (answeredCount > 0 && answeredCount < questions.length) {
           setCurrentQuestion(answeredCount);
         } else if (answeredCount === questions.length) {
@@ -317,7 +311,7 @@ export default function BrandPawaScoreDiagnostic() {
           calculateResults(savedAnswers);
         }
       }
-      
+
       setLoading(false);
     } catch (error) {
       console.error('Error in checkUser:', error);
@@ -327,14 +321,14 @@ export default function BrandPawaScoreDiagnostic() {
 
   const handleAnswer = async (questionId: number, points: number) => {
     if (saving) return;
-    
+
     setSaving(true);
     const newAnswers = { ...answers, [questionId]: points };
     setAnswers(newAnswers);
-    
+
     // Save progress
     await saveProgress(newAnswers);
-    
+
     // Auto-advance after delay
     setTimeout(() => {
       setSaving(false);
@@ -352,10 +346,10 @@ export default function BrandPawaScoreDiagnostic() {
       console.error('No user for saving progress');
       return;
     }
-    
+
     const progressPercentage = Math.round((Object.keys(answers).length / questions.length) * 100);
     const currentQuestionNum = Object.keys(answers).length;
-    
+
     const progressData = {
       user_id: user.id,
       diagnostic_id: 1,
@@ -364,20 +358,20 @@ export default function BrandPawaScoreDiagnostic() {
       current_question: currentQuestionNum,
       updated_at: new Date().toISOString()
     };
-    
+
     try {
       console.log('Saving progress:', progressData);
       const { error } = await supabase
         .from('diagnostic_progress')
-        .upsert(progressData, { 
+        .upsert(progressData, {
           onConflict: 'user_id,diagnostic_id'
         });
-      
+
       if (error) {
         console.error('Error saving progress:', error);
         throw error;
       }
-      
+
       console.log('Progress saved successfully');
     } catch (error) {
       console.error('Error in saveProgress:', error);
@@ -389,7 +383,7 @@ export default function BrandPawaScoreDiagnostic() {
     const total = Object.values(answers).reduce((sum, points) => sum + points, 0);
     console.log('Total score:', total);
     setTotalScore(total);
-    
+
     // Calculate pillars
     const pillarDefinitions: Omit<Pillar, 'score'>[] = [
       {
@@ -457,7 +451,7 @@ export default function BrandPawaScoreDiagnostic() {
     console.log('Calculated pillars:', calculatedPillars);
     setPillars(calculatedPillars);
     setShowResults(true);
-    
+
     // Save final results
     saveFinalResults(total, calculatedPillars, answers);
   };
@@ -467,14 +461,14 @@ export default function BrandPawaScoreDiagnostic() {
       console.error('No user for saving final results');
       return;
     }
-    
+
     console.log('Starting to save final results...');
     setLoading(true);
-    
+
     try {
       const stage = getScoreStage(score);
       console.log('Score stage:', stage);
-      
+
       const resultData = {
         pillars: pillars,
         overall_score: score,
@@ -485,10 +479,39 @@ export default function BrandPawaScoreDiagnostic() {
         answers: answers,
         timestamp: new Date().toISOString()
       };
-      
+
       console.log('Result data to save:', resultData);
-      
-      // Save diagnostic result
+
+      // 1. Get current diagnostic count to update profile
+      const { data: existingDiagnostics, error: countError } = await supabase
+        .from('user_diagnostics')
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('is_completed', true);
+
+      if (countError) console.error('Count error:', countError);
+      const diagnosticCount = existingDiagnostics?.length || 0;
+
+      // 2. Sync profile via backend API (bypasses auth race condition on new signup)
+      const syncRes = await fetch('/api/sync-profile', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: user.id,
+          email: user.email,
+          brand_score: score,
+          brand_stage: stage.name,
+          last_diagnostic_at: new Date().toISOString(),
+          diagnostic_count: diagnosticCount > 0 ? diagnosticCount : 1
+        })
+      });
+
+      if (!syncRes.ok) {
+        const syncErr = await syncRes.json();
+        throw new Error(syncErr.error || 'Failed to sync profile');
+      }
+
+      // 3. Save diagnostic result
       const { data: diagnosticData, error: diagnosticError } = await supabase
         .from('user_diagnostics')
         .upsert({
@@ -501,68 +524,31 @@ export default function BrandPawaScoreDiagnostic() {
           is_completed: true,
           completed_at: new Date().toISOString(),
           updated_at: new Date().toISOString()
-        }, { 
+        }, {
           onConflict: 'user_id,diagnostic_id'
         })
         .select();
-      
+
       if (diagnosticError) {
         console.error('Diagnostic save error:', diagnosticError);
         throw diagnosticError;
       }
-      
-      console.log('Diagnostic saved successfully:', diagnosticData);
-      
-      // Get current diagnostic count
-      const { data: existingDiagnostics, error: countError } = await supabase
-        .from('user_diagnostics')
-        .select('id')
-        .eq('user_id', user.id)
-        .eq('is_completed', true);
-      
-      if (countError) {
-        console.error('Count error:', countError);
-      }
-      
-      const diagnosticCount = existingDiagnostics?.length || 0;
-      console.log('Diagnostic count:', diagnosticCount);
-      
-      // Update user profile
-      const { data: profileData, error: profileError } = await supabase
-        .from('profiles')
-        .upsert({
-          id: user.id,
-          brand_score: score,
-          brand_stage: stage.name,
-          last_diagnostic_at: new Date().toISOString(),
-          diagnostic_count: diagnosticCount,
-          updated_at: new Date().toISOString()
-        }, {
-          onConflict: 'id'
-        })
-        .select();
-      
-      if (profileError) {
-        console.error('Profile update error:', profileError);
-        throw profileError;
-      }
-      
-      console.log('Profile updated successfully:', profileData);
-      
+
+
       // Clear progress
       const { error: progressError } = await supabase
         .from('diagnostic_progress')
         .delete()
         .eq('user_id', user.id)
         .eq('diagnostic_id', 1);
-      
+
       if (progressError) {
         console.error('Progress clear error:', progressError);
         // Don't throw, just log
       }
-      
+
       console.log('Progress cleared');
-      
+
       // Add activity
       const { data: activityData, error: activityError } = await supabase
         .from('user_activity')
@@ -578,14 +564,14 @@ export default function BrandPawaScoreDiagnostic() {
           created_at: new Date().toISOString()
         })
         .select();
-      
+
       if (activityError) {
         console.error('Activity save error:', activityError);
         // Don't throw, just log
       }
-      
+
       console.log('Activity saved:', activityData);
-      
+
       // Add to score history
       const { data: historyData, error: historyError } = await supabase
         .from('brand_score_history')
@@ -597,19 +583,19 @@ export default function BrandPawaScoreDiagnostic() {
           taken_at: new Date().toISOString()
         })
         .select();
-      
+
       if (historyError) {
         console.error('History save error:', historyError);
         // Don't throw, just log
       }
-      
+
       console.log('History saved:', historyData);
-      
+
       setFeedback({ type: 'success', message: 'Results saved successfully. You can now view them in your dashboard.' });
-      
-    } catch (error) {
+
+    } catch (error: any) {
       console.error('Error saving final results:', error);
-      setFeedback({ type: 'error', message: 'There was an error saving your results. Please try again or contact support.' });
+      setFeedback({ type: 'error', message: `There was an error saving your results: ${error.message || JSON.stringify(error)}. Please try again or contact support.` });
     } finally {
       setLoading(false);
     }
@@ -680,35 +666,35 @@ export default function BrandPawaScoreDiagnostic() {
       });
       return;
     }
-    
+
     setLoading(true);
     setFeedback(null);
-    
+
     try {
       console.log('Starting test retake...');
-      
+
       // Clear progress
       const { error: progressError } = await supabase
         .from('diagnostic_progress')
         .delete()
         .eq('user_id', user.id)
         .eq('diagnostic_id', 1);
-      
+
       if (progressError) {
         console.error('Progress clear error:', progressError);
       }
-      
+
       // Clear existing results
       const { error: diagnosticError } = await supabase
         .from('user_diagnostics')
         .delete()
         .eq('user_id', user.id)
         .eq('diagnostic_id', 1);
-      
+
       if (diagnosticError) {
         console.error('Diagnostic clear error:', diagnosticError);
       }
-      
+
       console.log('Reset state');
       // Reset state
       setAnswers({});
@@ -719,7 +705,7 @@ export default function BrandPawaScoreDiagnostic() {
       setHasExistingResult(false);
       setExistingResult(null);
       setProgress(null);
-      
+
       // Add activity
       const { error: activityError } = await supabase
         .from('user_activity')
@@ -730,13 +716,13 @@ export default function BrandPawaScoreDiagnostic() {
           diagnostic_id: 1,
           created_at: new Date().toISOString()
         });
-      
+
       if (activityError) {
         console.error('Activity error:', activityError);
       }
-      
+
       setFeedback({ type: 'success', message: 'Test reset successfully. You can now retake it.' });
-      
+
     } catch (error) {
       console.error('Error retaking test:', error);
       setFeedback({ type: 'error', message: 'There was an error resetting the test. Please try again.' });
@@ -774,12 +760,12 @@ export default function BrandPawaScoreDiagnostic() {
 
     const sharedNatively = platform === 'facebook' || platform === 'linkedin' || platform === 'whatsapp'
       ? await shareViaNative({
-          title: 'My BrandPawa Score',
-          text: shareText,
-          url: 'https://brandpawa.com',
-          file: shareFile,
-          preferTextOnly: platform === 'linkedin',
-        })
+        title: 'My BrandPawa Score',
+        text: shareText,
+        url: 'https://brandpawa.com',
+        file: shareFile,
+        preferTextOnly: platform === 'linkedin',
+      })
       : false;
 
     if (!sharedNatively) {
@@ -789,7 +775,7 @@ export default function BrandPawaScoreDiagnostic() {
         url: 'https://brandpawa.com',
       });
     }
-    
+
     // Save share to database
     if (user) {
       supabase
@@ -867,11 +853,10 @@ export default function BrandPawaScoreDiagnostic() {
 
     return (
       <div
-        className={`mb-4 rounded-xl border px-4 py-3 text-sm ${
-          feedback.type === 'success'
+        className={`mb-4 rounded-xl border px-4 py-3 text-sm ${feedback.type === 'success'
             ? 'border-green-200 bg-green-50 text-green-700'
             : 'border-red-200 bg-red-50 text-red-700'
-        }`}
+          }`}
       >
         {feedback.message}
       </div>
@@ -882,7 +867,7 @@ export default function BrandPawaScoreDiagnostic() {
     const question = questions[currentQuestion];
     const progress = ((currentQuestion + 1) / questions.length) * 100;
     const answeredCount = Object.keys(answers).length;
-    
+
     return (
       <div className="min-h-screen bg-[#FAF0FF] p-4">
         <div className="mx-auto max-w-5xl">
@@ -895,7 +880,7 @@ export default function BrandPawaScoreDiagnostic() {
               <FiArrowLeft />
               <span className="text-sm">Back to Dashboard</span>
             </button>
-            
+
             <div className="flex items-center justify-between mb-4">
               <div>
                 <h1 className="text-2xl font-bold">BrandPawa Score™</h1>
@@ -905,7 +890,7 @@ export default function BrandPawaScoreDiagnostic() {
                 <span className="text-sm text-gray-500">Saving...</span>
               )}
             </div>
-            
+
             {/* Progress bar */}
             <div className="mb-6">
               <div className="flex justify-between text-sm text-gray-600 mb-1">
@@ -921,130 +906,127 @@ export default function BrandPawaScoreDiagnostic() {
             </div>
           </div>
           {renderFeedback()}
-          
-          <div className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
-          {/* Question Card */}
-          <div className="bg-white rounded-2xl shadow-lg p-6 mb-6 lg:mb-0">
-            {hasExistingResult ? (
-              <div className="text-center py-6">
-                <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <FiCheckCircle className="text-green-600 text-2xl" />
-                </div>
-                <h2 className="text-xl font-bold mb-2">You've Already Completed This Test!</h2>
-                <p className="text-gray-600 mb-4">
-                  Your score: <span className={`text-3xl font-bold ${getScoreColor(existingResult.score)}`}>
-                    {existingResult.score}/100
-                  </span>
-                </p>
-                <div className="space-y-3">
-                  <button
-                    onClick={handleRetakeTest}
-                    disabled={loading || (!isProUser && !hasRemainingFreeDiagnosticAttempts(attemptCount))}
-                    className="w-full py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-xl font-semibold hover:shadow-lg transition disabled:opacity-50"
-                  >
-                    {loading ? 'Resetting...' : !isProUser && !hasRemainingFreeDiagnosticAttempts(attemptCount) ? 'Upgrade to Retake' : 'Retake Test'}
-                  </button>
-                  <button
-                    onClick={() => router.push('/dashboard')}
-                    className="w-full py-3 bg-white border border-purple-300 text-purple-600 rounded-xl font-semibold hover:bg-purple-50 transition"
-                  >
-                    Back to Dashboard
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <>
-                <div className="mb-6">
-                  <h2 className="text-lg font-bold mb-2">Question {question.id}:</h2>
-                  <p className="text-gray-700 text-lg">{question.text}</p>
-                </div>
-                
-                <div className="space-y-3">
-                  {question.options.map((option, index) => (
-                    <button
-                      key={index}
-                      onClick={() => handleAnswer(question.id, option.points)}
-                      disabled={saving}
-                      className={`w-full text-left p-4 rounded-xl border-2 transition-all ${
-                        answers[question.id] === option.points
-                          ? 'border-purple-500 bg-purple-50'
-                          : 'border-gray-200 hover:border-purple-300 hover:bg-purple-50'
-                      } disabled:opacity-50`}
-                    >
-                      <div className="flex items-center justify-between">
-                        <span className="font-medium">{option.text}</span>
-                        <div className="flex items-center space-x-2">
-                          {answers[question.id] === option.points && (
-                            <FiCheck className="text-green-500" />
-                          )}
-                        </div>
-                      </div>
-                    </button>
-                  ))}
-                </div>
-                
-                {/* Navigation */}
-                <div className="flex justify-between mt-8">
-                  <button
-                    onClick={handlePrevious}
-                    disabled={currentQuestion === 0 || saving}
-                    className={`px-4 py-2 rounded-lg flex items-center space-x-2 ${
-                      currentQuestion === 0 ? 'text-gray-400' : 'text-purple-600 hover:bg-purple-50'
-                    }`}
-                  >
-                    <FiChevronLeft />
-                    <span>Previous</span>
-                  </button>
-                  
-                  <button
-                    onClick={handleNext}
-                    disabled={!answers[question.id] || currentQuestion === questions.length - 1 || saving}
-                    className={`px-4 py-2 rounded-lg flex items-center space-x-2 ${
-                      !answers[question.id]
-                        ? 'text-gray-400'
-                        : 'bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:shadow-lg'
-                    }`}
-                  >
-                    <span>{currentQuestion === questions.length - 1 ? 'Finish' : 'Next'}</span>
-                    <FiChevronRight />
-                  </button>
-                </div>
-              </>
-            )}
-          </div>
-          
-          <div className="space-y-6">
-            <div className="bg-white rounded-2xl shadow-lg p-6">
-              <h3 className="font-bold mb-2">Keep going</h3>
-              <p className="text-gray-600 text-sm">
-                Answer based on how your brand performs today so the final score reflects the real gaps to fix.
-              </p>
-              <div className="mt-5 rounded-2xl bg-purple-50 p-4">
-                <div className="text-xs font-semibold uppercase tracking-[0.2em] text-purple-700">Balance Check</div>
-                <div className="mt-2 text-sm text-slate-700">
-                  BrandPawa Score works best when you answer honestly, not aspirationally. The goal is clarity before execution.
-                </div>
-              </div>
 
-              {debugMode && (
-                <div className="mt-4 rounded-lg bg-gray-100 p-3">
-                  <button
-                    onClick={async () => {
-                      const { data } = await supabase
-                        .from('user_diagnostics')
-                        .select('*')
-                        .eq('user_id', user?.id);
-                      console.log('Current diagnostics:', data);
-                    }}
-                    className="text-xs text-gray-600 hover:text-gray-800"
-                  >
-                    Debug: Check DB
-                  </button>
+          <div className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
+            {/* Question Card */}
+            <div className="bg-white rounded-2xl shadow-lg p-6 mb-6 lg:mb-0">
+              {hasExistingResult ? (
+                <div className="text-center py-6">
+                  <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <FiCheckCircle className="text-green-600 text-2xl" />
+                  </div>
+                  <h2 className="text-xl font-bold mb-2">You've Already Completed This Test!</h2>
+                  <p className="text-gray-600 mb-4">
+                    Your score: <span className={`text-3xl font-bold ${getScoreColor(existingResult.score)}`}>
+                      {existingResult.score}/100
+                    </span>
+                  </p>
+                  <div className="space-y-3">
+                    <button
+                      onClick={handleRetakeTest}
+                      disabled={loading || (!isProUser && !hasRemainingFreeDiagnosticAttempts(attemptCount))}
+                      className="w-full py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-xl font-semibold hover:shadow-lg transition disabled:opacity-50"
+                    >
+                      {loading ? 'Resetting...' : !isProUser && !hasRemainingFreeDiagnosticAttempts(attemptCount) ? 'Upgrade to Retake' : 'Retake Test'}
+                    </button>
+                    <button
+                      onClick={() => router.push('/dashboard')}
+                      className="w-full py-3 bg-white border border-purple-300 text-purple-600 rounded-xl font-semibold hover:bg-purple-50 transition"
+                    >
+                      Back to Dashboard
+                    </button>
+                  </div>
                 </div>
+              ) : (
+                <>
+                  <div className="mb-6">
+                    <h2 className="text-lg font-bold mb-2">Question {question.id}:</h2>
+                    <p className="text-gray-700 text-lg">{question.text}</p>
+                  </div>
+
+                  <div className="space-y-3">
+                    {question.options.map((option, index) => (
+                      <button
+                        key={index}
+                        onClick={() => handleAnswer(question.id, option.points)}
+                        disabled={saving}
+                        className={`w-full text-left p-4 rounded-xl border-2 transition-all ${answers[question.id] === option.points
+                            ? 'border-purple-500 bg-purple-50'
+                            : 'border-gray-200 hover:border-purple-300 hover:bg-purple-50'
+                          } disabled:opacity-50`}
+                      >
+                        <div className="flex items-center justify-between">
+                          <span className="font-medium">{option.text}</span>
+                          <div className="flex items-center space-x-2">
+                            {answers[question.id] === option.points && (
+                              <FiCheck className="text-green-500" />
+                            )}
+                          </div>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Navigation */}
+                  <div className="flex justify-between mt-8">
+                    <button
+                      onClick={handlePrevious}
+                      disabled={currentQuestion === 0 || saving}
+                      className={`px-4 py-2 rounded-lg flex items-center space-x-2 ${currentQuestion === 0 ? 'text-gray-400' : 'text-purple-600 hover:bg-purple-50'
+                        }`}
+                    >
+                      <FiChevronLeft />
+                      <span>Previous</span>
+                    </button>
+
+                    <button
+                      onClick={handleNext}
+                      disabled={!answers[question.id] || currentQuestion === questions.length - 1 || saving}
+                      className={`px-4 py-2 rounded-lg flex items-center space-x-2 ${!answers[question.id]
+                          ? 'text-gray-400'
+                          : 'bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:shadow-lg'
+                        }`}
+                    >
+                      <span>{currentQuestion === questions.length - 1 ? 'Finish' : 'Next'}</span>
+                      <FiChevronRight />
+                    </button>
+                  </div>
+                </>
               )}
             </div>
 
-          </div>
+            <div className="space-y-6">
+              <div className="bg-white rounded-2xl shadow-lg p-6">
+                <h3 className="font-bold mb-2">Keep going</h3>
+                <p className="text-gray-600 text-sm">
+                  Answer based on how your brand performs today so the final score reflects the real gaps to fix.
+                </p>
+                <div className="mt-5 rounded-2xl bg-purple-50 p-4">
+                  <div className="text-xs font-semibold uppercase tracking-[0.2em] text-purple-700">Balance Check</div>
+                  <div className="mt-2 text-sm text-slate-700">
+                    BrandPawa Score works best when you answer honestly, not aspirationally. The goal is clarity before execution.
+                  </div>
+                </div>
+
+                {debugMode && (
+                  <div className="mt-4 rounded-lg bg-gray-100 p-3">
+                    <button
+                      onClick={async () => {
+                        const { data } = await supabase
+                          .from('user_diagnostics')
+                          .select('*')
+                          .eq('user_id', user?.id);
+                        console.log('Current diagnostics:', data);
+                      }}
+                      className="text-xs text-gray-600 hover:text-gray-800"
+                    >
+                      Debug: Check DB
+                    </button>
+                  </div>
+                )}
+              </div>
+
+            </div>
           </div>
         </div>
       </div>
@@ -1054,7 +1036,7 @@ export default function BrandPawaScoreDiagnostic() {
   const renderResults = () => {
     const stage = getScoreStage(totalScore);
     const progress = (totalScore / 100) * 100;
-    
+
     return (
       <div className="min-h-screen bg-[#FAF0FF] p-4">
         <div className="max-w-6xl mx-auto">
@@ -1067,7 +1049,7 @@ export default function BrandPawaScoreDiagnostic() {
               <FiArrowLeft />
               <span className="text-sm">Back to Dashboard</span>
             </button>
-            
+
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
               <div>
                 <h1 className="text-2xl md:text-3xl font-bold">Your BrandPawa Score Results</h1>
@@ -1092,7 +1074,7 @@ export default function BrandPawaScoreDiagnostic() {
             </div>
           </div>
           {renderFeedback()}
-          
+
           <div className="grid lg:grid-cols-3 gap-6">
             {/* Main Score Card */}
             <div className="lg:col-span-2 space-y-6">
@@ -1109,7 +1091,7 @@ export default function BrandPawaScoreDiagnostic() {
                     </div>
                   </div>
                 </div>
-                
+
                 <div className="space-y-6">
                   <div>
                     <div className="flex justify-between text-sm text-gray-600 mb-2">
@@ -1123,19 +1105,19 @@ export default function BrandPawaScoreDiagnostic() {
                       ></div>
                     </div>
                   </div>
-                  
+
                   <div className={`p-4 rounded-lg ${stage.bgColor}`}>
                     <div className="font-bold mb-1">{stage.tagline}</div>
                     <p className="text-sm text-gray-700">{stage.diagnosis}</p>
                   </div>
-                  
+
                   <div>
                     <h3 className="font-bold mb-2">Next Step:</h3>
                     <p className="text-gray-700">{stage.nextStep}</p>
                   </div>
                 </div>
               </div>
-              
+
               {/* Pillar Breakdown */}
               <div className="bg-white rounded-2xl shadow-lg p-6">
                 <div className="flex justify-between items-center mb-6">
@@ -1146,7 +1128,7 @@ export default function BrandPawaScoreDiagnostic() {
                     </span>
                   )}
                 </div>
-                
+
                 <div className="space-y-4">
                   {pillars.map((pillar, index) => (
                     <div key={index} className="border border-gray-200 rounded-lg p-4">
@@ -1159,7 +1141,7 @@ export default function BrandPawaScoreDiagnostic() {
                           {pillar.score}<span className="text-lg text-gray-400">/{pillar.maxScore}</span>
                         </div>
                       </div>
-                      
+
                       <div className="mb-3">
                         <div className="w-full bg-gray-200 rounded-full h-2">
                           <div
@@ -1168,7 +1150,7 @@ export default function BrandPawaScoreDiagnostic() {
                           ></div>
                         </div>
                       </div>
-                      
+
                       {isProUser ? (
                         <div>
                           <h4 className="font-semibold mb-2 text-sm">Action Steps:</h4>
@@ -1199,7 +1181,7 @@ export default function BrandPawaScoreDiagnostic() {
                 </div>
               </div>
             </div>
-            
+
             {/* Sidebar */}
             <div className="space-y-6">
               {/* Share Card */}
@@ -1251,26 +1233,26 @@ export default function BrandPawaScoreDiagnostic() {
                   </button>
                 </div>
               </div>
-              
+
               {/* Next Steps */}
               <div className="bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl shadow-lg p-6 text-white">
                 <h3 className="font-bold mb-4">Next Steps</h3>
                 <div className="space-y-3">
-                  <button 
+                  <button
                     onClick={() => router.push('/tools/guides')}
                     className="w-full text-left p-3 bg-white/20 hover:bg-white/30 rounded-lg transition"
                   >
                     <div className="font-semibold">40-Day Brand Guide</div>
                     <div className="text-xs opacity-90">Comprehensive roadmap</div>
                   </button>
-                  <button 
+                  <button
                     onClick={() => router.push('/tools/monetization')}
                     className="w-full text-left p-3 bg-white/20 hover:bg-white/30 rounded-lg transition"
                   >
                     <div className="font-semibold">Brand To Sell 101</div>
                     <div className="text-xs opacity-90">Monetization strategy</div>
                   </button>
-                  <button 
+                  <button
                     onClick={() => window.open('https://calendly.com/brandpawa', '_blank')}
                     className="w-full text-left p-3 bg-white/20 hover:bg-white/30 rounded-lg transition"
                   >
@@ -1279,7 +1261,7 @@ export default function BrandPawaScoreDiagnostic() {
                   </button>
                 </div>
               </div>
-              
+
               {/* More Tests */}
               <div className="bg-white rounded-2xl shadow-lg p-6">
                 <h3 className="font-bold mb-4">Continue Your Journey</h3>
@@ -1302,13 +1284,13 @@ export default function BrandPawaScoreDiagnostic() {
               </div>
             </div>
           </div>
-          
+
           {/* Live Score Wall */}
           <div className="mt-8">
             <LiveBrandWall title="Live BrandPawa Wall" subtitle="See recent BrandPawa Score activity and this week’s leaderboard." />
           </div>
         </div>
-        
+
         {/* Share Modal */}
         {showShareModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.42),_transparent_25%),rgba(250,240,255,0.72)] p-4 backdrop-blur-md">
