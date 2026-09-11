@@ -133,17 +133,20 @@ export default function OnboardingDiagnostic() {
       setIsLoggedIn(!!data?.user);
     });
 
-    // Load any existing progress from localStorage
+    // Only restore IN-PROGRESS answers — never auto-jump to results from cache.
+    // If the quiz was already completed, clear it so the user starts fresh.
     const saved = localStorage.getItem(ONBOARDING_ANSWERS_KEY);
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
-        setAnswers(parsed);
         const answeredCount = Object.keys(parsed).length;
-        if (answeredCount === questions.length) {
-          calculateResults(parsed);
-        } else if (answeredCount > 0) {
+        if (answeredCount > 0 && answeredCount < questions.length) {
+          // Partially done — restore progress
+          setAnswers(parsed);
           setCurrentQuestion(answeredCount);
+        } else if (answeredCount >= questions.length) {
+          // Fully completed previously — clear it so they start fresh
+          localStorage.removeItem(ONBOARDING_ANSWERS_KEY);
         }
       } catch (e) {
         console.error('Failed to parse onboarding answers', e);
@@ -167,6 +170,8 @@ export default function OnboardingDiagnostic() {
 
   const calculateResults = (finalAnswers: Record<number, number>) => {
     const total = Object.values(finalAnswers).reduce((sum, points) => sum + points, 0);
+    // Clear so revisiting /onboarding always starts a fresh quiz
+    localStorage.removeItem(ONBOARDING_ANSWERS_KEY);
     setTotalScore(total);
     setShowResults(true);
   };
