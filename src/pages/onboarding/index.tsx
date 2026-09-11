@@ -2,8 +2,9 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
-import { FiArrowLeft, FiCheck, FiChevronRight, FiChevronLeft, FiLock } from 'react-icons/fi';
+import { FiCheck, FiChevronRight, FiChevronLeft, FiLock, FiX, FiShare2, FiRefreshCw, FiArrowRight } from 'react-icons/fi';
 import { BrandPawaLogo } from '../../components/BrandPawaLogo';
+import { supabase } from '../../lib/supabase';
 
 interface Question {
   id: number;
@@ -110,14 +111,28 @@ const questions: Question[] = [
 
 export const ONBOARDING_ANSWERS_KEY = 'brandpawa_onboarding_answers';
 
+function getScoreLabel(score: number): { label: string; color: string } {
+  if (score >= 80) return { label: 'Strong Brand', color: 'text-green-600' };
+  if (score >= 60) return { label: 'Growing Brand', color: 'text-blue-600' };
+  if (score >= 40) return { label: 'Developing Brand', color: 'text-yellow-600' };
+  return { label: 'Emerging Brand', color: 'text-orange-500' };
+}
+
 export default function OnboardingDiagnostic() {
   const router = useRouter();
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [answers, setAnswers] = useState<Record<number, number>>({});
   const [showResults, setShowResults] = useState(false);
   const [totalScore, setTotalScore] = useState(0);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [shareSuccess, setShareSuccess] = useState(false);
 
   useEffect(() => {
+    // Check auth state
+    supabase.auth.getUser().then(({ data }) => {
+      setIsLoggedIn(!!data?.user);
+    });
+
     // Load any existing progress from localStorage
     const saved = localStorage.getItem(ONBOARDING_ANSWERS_KEY);
     if (saved) {
@@ -156,6 +171,42 @@ export default function OnboardingDiagnostic() {
     setShowResults(true);
   };
 
+  const handleRetake = () => {
+    localStorage.removeItem(ONBOARDING_ANSWERS_KEY);
+    setAnswers({});
+    setCurrentQuestion(0);
+    setShowResults(false);
+    setTotalScore(0);
+  };
+
+  const handleShare = async () => {
+    const scoreLabel = getScoreLabel(totalScore).label;
+    const shareData = {
+      title: 'My BrandPawa Score',
+      text: `I just scored ${totalScore}/100 on the BrandPawa Brand Assessment — ${scoreLabel}! Find out your brand strength at BrandPawa.`,
+      url: 'https://bp-50-orpin.vercel.app/onboarding',
+    };
+
+    if (navigator.share) {
+      try {
+        await navigator.share(shareData);
+      } catch (_err) {
+        // User cancelled share — that's fine
+      }
+    } else {
+      // Fallback: copy link to clipboard
+      try {
+        await navigator.clipboard.writeText(
+          `I scored ${totalScore}/100 on the BrandPawa Brand Test! Check your brand strength: ${shareData.url}`
+        );
+        setShareSuccess(true);
+        setTimeout(() => setShareSuccess(false), 2500);
+      } catch (_err) {
+        // silent fail
+      }
+    }
+  };
+
   const handleNext = () => {
     if (currentQuestion < questions.length - 1) {
       setCurrentQuestion(currentQuestion + 1);
@@ -171,7 +222,6 @@ export default function OnboardingDiagnostic() {
   const renderQuestion = () => {
     const question = questions[currentQuestion];
     const progress = ((currentQuestion + 1) / questions.length) * 100;
-    const answeredCount = Object.keys(answers).length;
 
     return (
       <div className="min-h-screen bg-[#FAF0FF] p-4 flex items-center justify-center">
@@ -185,9 +235,11 @@ export default function OnboardingDiagnostic() {
             </div>
             <button
               onClick={() => router.push('/')}
-              className="text-gray-500 hover:text-gray-700 text-sm flex items-center space-x-1"
+              className="text-gray-500 hover:text-gray-700 text-sm flex items-center space-x-1 p-2 rounded-lg hover:bg-white/60 transition"
+              aria-label="Exit test"
             >
-              <span>Exit</span>
+              <FiX size={18} />
+              <span className="hidden sm:inline">Exit</span>
             </button>
           </div>
 
@@ -264,57 +316,118 @@ export default function OnboardingDiagnostic() {
   };
 
   const renderResults = () => {
+    const { label: scoreLabel, color: scoreColor } = getScoreLabel(totalScore);
+
     return (
       <div className="min-h-screen bg-[#FAF0FF] p-4 flex flex-col items-center justify-center">
         <Head>
           <title>Your BrandPawa Score | Results</title>
         </Head>
-        
-        <div className="w-full max-w-2xl text-center mb-8">
-          <BrandPawaLogo className="h-10 w-auto text-purple-600 mx-auto mb-6" />
-          <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">You've completed the test!</h1>
-          <p className="text-gray-600 text-lg">Your initial brand score is ready.</p>
+
+        {/* Top action bar */}
+        <div className="w-full max-w-md flex items-center justify-between mb-6">
+          {/* Retake button */}
+          <button
+            onClick={handleRetake}
+            className="flex items-center gap-2 text-sm font-medium text-gray-600 hover:text-purple-700 px-3 py-2 rounded-xl hover:bg-white/70 transition"
+          >
+            <FiRefreshCw size={15} />
+            <span>Retake</span>
+          </button>
+
+          <BrandPawaLogo className="h-8 w-auto text-purple-600" />
+
+          {/* Close button */}
+          <button
+            onClick={() => router.push('/')}
+            className="flex items-center gap-2 text-sm font-medium text-gray-500 hover:text-gray-800 px-3 py-2 rounded-xl hover:bg-white/70 transition"
+            aria-label="Close results"
+          >
+            <FiX size={18} />
+            <span className="hidden sm:inline">Close</span>
+          </button>
         </div>
 
-        <div className="w-full max-w-md bg-white rounded-2xl shadow-xl overflow-hidden relative">
-          
+        {/* Score card */}
+        <div className="w-full max-w-md bg-white rounded-2xl shadow-xl overflow-hidden">
+
+          {/* Score header */}
           <div className="p-8 text-center border-b border-gray-100">
-            <div className="text-gray-500 font-semibold tracking-wider text-sm mb-2 uppercase">Your BrandPawa Score</div>
-            <div className="text-7xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-600">
+            <p className="text-gray-500 font-semibold tracking-wider text-xs mb-1 uppercase">
+              Your BrandPawa Score
+            </p>
+            <div className="text-8xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-600 leading-none py-3">
               {totalScore}
             </div>
-            <div className="text-gray-400 mt-1">out of 100</div>
+            <div className="text-gray-400 text-sm mb-2">out of 100</div>
+            <span className={`text-sm font-semibold ${scoreColor}`}>{scoreLabel}</span>
           </div>
 
-          <div className="p-8 bg-gray-50/50">
-            <div className="space-y-4">
-              <div className="flex items-center space-x-3 text-gray-700 bg-white p-3 rounded-xl shadow-sm border border-gray-100">
-                <FiLock className="text-purple-500 flex-shrink-0" />
-                <span className="text-sm font-medium">Detailed 5-pillar breakdown locked</span>
-              </div>
-              <div className="flex items-center space-x-3 text-gray-700 bg-white p-3 rounded-xl shadow-sm border border-gray-100">
-                <FiLock className="text-purple-500 flex-shrink-0" />
-                <span className="text-sm font-medium">Personalized growth stage locked</span>
-              </div>
-              <div className="flex items-center space-x-3 text-gray-700 bg-white p-3 rounded-xl shadow-sm border border-gray-100">
-                <FiLock className="text-purple-500 flex-shrink-0" />
-                <span className="text-sm font-medium">Custom action plan locked</span>
-              </div>
+          {/* Locked insights */}
+          <div className="p-6 bg-gray-50/60">
+            <p className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-3">
+              Unlock your full report
+            </p>
+            <div className="space-y-3">
+              {[
+                'Detailed 5-pillar breakdown',
+                'Personalized growth stage',
+                'Custom action plan',
+              ].map((item) => (
+                <div
+                  key={item}
+                  className="flex items-center space-x-3 text-gray-700 bg-white p-3 rounded-xl shadow-sm border border-gray-100"
+                >
+                  <FiLock className="text-purple-400 flex-shrink-0" size={15} />
+                  <span className="text-sm font-medium">{item} locked</span>
+                </div>
+              ))}
             </div>
 
-            <div className="mt-8">
+            {/* Share row */}
+            <div className="mt-4 flex justify-center">
               <button
-                onClick={() => {
-                  // Direct to homepage but with a query param to trigger signup modal
-                  router.push('/?auth=signup&redirect=dashboard');
-                }}
-                className="w-full py-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl font-bold text-lg shadow-lg hover:shadow-xl transition transform hover:-translate-y-0.5"
+                onClick={handleShare}
+                className="flex items-center gap-2 text-sm text-purple-600 font-medium hover:text-purple-800 px-4 py-2 rounded-xl hover:bg-purple-50 transition"
               >
-                Sign up to unlock full report
+                <FiShare2 size={15} />
+                <span>{shareSuccess ? 'Link copied!' : 'Share your score'}</span>
               </button>
-              <p className="text-center text-xs text-gray-500 mt-4">
-                Already have an account? <button onClick={() => router.push('/?auth=login&redirect=dashboard')} className="text-purple-600 font-semibold hover:underline">Log in</button>
-              </p>
+            </div>
+
+            {/* CTA */}
+            <div className="mt-5">
+              {isLoggedIn ? (
+                <button
+                  onClick={() => router.push('/dashboard')}
+                  className="w-full py-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl font-bold text-base shadow-lg hover:shadow-xl transition transform hover:-translate-y-0.5 flex items-center justify-center gap-2"
+                >
+                  <span>Go to Dashboard</span>
+                  <FiArrowRight />
+                </button>
+              ) : (
+                <button
+                  onClick={() => {
+                    router.push('/?auth=signup&redirect=dashboard');
+                  }}
+                  className="w-full py-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl font-bold text-base shadow-lg hover:shadow-xl transition transform hover:-translate-y-0.5 flex items-center justify-center gap-2"
+                >
+                  <span>Get Started — Unlock Full Report</span>
+                  <FiArrowRight />
+                </button>
+              )}
+
+              {!isLoggedIn && (
+                <p className="text-center text-xs text-gray-500 mt-3">
+                  Already have an account?{' '}
+                  <button
+                    onClick={() => router.push('/?auth=login&redirect=dashboard')}
+                    className="text-purple-600 font-semibold hover:underline"
+                  >
+                    Log in
+                  </button>
+                </p>
+              )}
             </div>
           </div>
         </div>

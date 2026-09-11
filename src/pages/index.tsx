@@ -88,8 +88,11 @@ export default function HomePage() {
   } | null;
 
   const router = useRouter();
-  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
-  const [isSignupModalOpen, setIsSignupModalOpen] = useState(false);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [authModalTab, setAuthModalTab] = useState<'login' | 'signup'>('signup');
+  // Legacy aliases kept for compatibility with existing internal code
+  const setIsLoginModalOpen = (v: boolean) => { if (v) { setAuthModalTab('login'); setIsAuthModalOpen(true); } else { setIsAuthModalOpen(false); } };
+  const setIsSignupModalOpen = (v: boolean) => { if (v) { setAuthModalTab('signup'); setIsAuthModalOpen(true); } else { setIsAuthModalOpen(false); } };
   const [newsletterEmail, setNewsletterEmail] = useState('');
   const [isWaitlistModalOpen, setIsWaitlistModalOpen] = useState(false);
   const [waitlistEmail, setWaitlistEmail] = useState('');
@@ -239,9 +242,11 @@ export default function HomePage() {
   useEffect(() => {
     if (router.isReady) {
       if (router.query.auth === 'signup') {
-        setIsSignupModalOpen(true);
+        setAuthModalTab('signup');
+        setIsAuthModalOpen(true);
       } else if (router.query.auth === 'login') {
-        setIsLoginModalOpen(true);
+        setAuthModalTab('login');
+        setIsAuthModalOpen(true);
       }
     }
   }, [router.isReady, router.query.auth]);
@@ -257,8 +262,7 @@ export default function HomePage() {
     setStartFlowBrandName(savedStartFlow.brandName ?? '');
     setStartFlowStep(0);
     setIsStartFlowOpen(true);
-    setIsLoginModalOpen(false);
-    setIsSignupModalOpen(false);
+    setIsAuthModalOpen(false);
     setAuthError('');
     setAuthSuccess('');
   }, [sessionUser]);
@@ -637,8 +641,18 @@ export default function HomePage() {
             ],
           },
         ]}
-        ctaSecondary={{ label: sessionUser ? 'Dashboard' : 'Login', onClick: () => (sessionUser ? router.push('/dashboard') : setIsLoginModalOpen(true)) }}
-        ctaPrimary={{ label: sessionUser ? 'Open App' : 'Sign Up', onClick: () => (sessionUser ? router.push('/dashboard') : setIsSignupModalOpen(true)) }}
+
+        ctaPrimary={{
+          label: sessionUser ? 'Dashboard' : 'Get Started',
+          onClick: () => {
+            if (sessionUser) {
+              router.push('/dashboard');
+            } else {
+              setAuthModalTab('signup');
+              setIsAuthModalOpen(true);
+            }
+          },
+        }}
       />
 
       <main>
@@ -681,7 +695,13 @@ export default function HomePage() {
                     <FiArrowRight className="transition-transform group-hover:translate-x-1" />
                   </button>
                   <button
-                    onClick={() => router.push('/onboarding')}
+                    onClick={() => {
+                      if (sessionUser) {
+                        router.push('/dashboard?section=diagnostics');
+                      } else {
+                        router.push('/quizzes');
+                      }
+                    }}
                     className="site-ghost-button justify-center sm:justify-start"
                   >
                     <span>Start a Quiz</span>
@@ -1467,15 +1487,15 @@ export default function HomePage() {
                       onClick={() => startExperience('signup')}
                       className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-purple-500 to-pink-500 px-5 py-3 font-semibold text-white transition hover:shadow-lg"
                     >
-                      <span>Create Free Account and Start</span>
+                      <span>Get Started Free</span>
                       <FiArrowRight />
                     </button>
                     <button
                       type="button"
                       onClick={() => startExperience('login')}
-                      className="rounded-2xl border border-slate-200 px-5 py-3 font-semibold text-slate-700 transition hover:bg-slate-50"
+                      className="rounded-2xl border border-slate-200 px-5 py-3 text-sm font-medium text-slate-500 transition hover:bg-slate-50"
                     >
-                      I already have an account
+                      Already have an account? Sign in
                     </button>
                   </>
                 )}
@@ -1492,298 +1512,247 @@ export default function HomePage() {
         </div>
       </Modal>
 
-      {/* Login Modal */}
-      <Modal isOpen={isLoginModalOpen} onClose={() => setIsLoginModalOpen(false)}>
+      {/* Unified Auth Modal */}
+      <Modal isOpen={isAuthModalOpen} onClose={() => { setIsAuthModalOpen(false); setAuthError(''); setAuthSuccess(''); }}>
         <div className="p-6 sm:p-8">
-          <div className="mb-4 sm:mb-6 flex justify-center">
+          <div className="mb-6 flex justify-center">
             <BrandPawaLogo href="" size="md" />
           </div>
-          <h3 className="text-xl sm:text-2xl font-bold text-center mb-2">Sign in to BrandPawa</h3>
-          <p className="text-sm sm:text-base text-gray-600 text-center mb-6 sm:mb-8">Access your brand Workspace</p>
           
-          {authError && (
-            <div className="mb-3 sm:mb-4 p-2.5 sm:p-3 bg-red-50 border border-red-200 text-red-600 rounded-lg text-xs sm:text-sm">
-              {authError}
-            </div>
-          )}
-
-          {authSuccess && (
-            <div className="mb-3 sm:mb-4 p-2.5 sm:p-3 bg-green-50 border border-green-200 text-green-600 rounded-lg text-xs sm:text-sm">
-              {authSuccess}
-            </div>
-          )}
-          
-          <form onSubmit={handleLogin} className="space-y-3 sm:space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1 sm:mb-2">
-                Email Address
-              </label>
-              <input
-                type="email"
-                value={loginEmail}
-                onChange={(e) => setLoginEmail(e.target.value)}
-                className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm sm:text-base"
-                placeholder="you@company.com"
-                required
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1 sm:mb-2">
-                Password
-              </label>
-              <div className="relative">
-                <input
-                  type={showLoginPassword ? "text" : "password"}
-                  value={loginPassword}
-                  onChange={(e) => setLoginPassword(e.target.value)}
-                  className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm sm:text-base pr-10"
-                  placeholder="••••••••"
-                  required
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowLoginPassword(!showLoginPassword)}
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-gray-700"
-                >
-                  {showLoginPassword ? <FiEyeOff size={18} /> : <FiEyeIcon size={18} />}
-                </button>
-              </div>
-            </div>
-            
-            <div className="flex items-center justify-between text-sm">
-              <label className="flex items-center space-x-2">
-                <input type="checkbox" className="rounded text-purple-600 w-4 h-4" />
-                <span className="text-gray-600">Remember me</span>
-              </label>
-              <button
-                type="button"
-                onClick={() => {
-                  if (!loginEmail) {
-                    setAuthError('Please enter your email first');
-                    return;
-                  }
-                  // Handle password reset
-                  supabase.auth.resetPasswordForEmail(loginEmail, {
-                    redirectTo: `${window.location.origin}/auth/reset-password`,
-                  }).then(() => {
-                    setAuthSuccess('Password reset email sent! Check your inbox.');
-                  }).catch((error) => {
-                    setAuthError(error.message);
-                  });
-                }}
-                className="text-purple-600 hover:text-purple-700 text-sm"
-              >
-                Forgot password?
-              </button>
-            </div>
-            
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full py-2.5 sm:py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-xl font-semibold hover:shadow-lg transition disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base"
-            >
-              {loading ? 'Signing in...' : 'Sign In to Workspace'}
-            </button>
-            
-            <div className="relative my-4 sm:my-6">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-300"></div>
-              </div>
-              <div className="relative flex justify-center text-xs sm:text-sm">
-                <span className="px-2 bg-white text-gray-500">Or continue with</span>
-              </div>
-            </div>
-            
+          <div className="flex border-b border-gray-200 mb-6">
             <button
               type="button"
-              onClick={handleGoogleLogin}
-              disabled={loading}
-              className="w-full py-2.5 sm:py-3 border border-gray-300 rounded-xl font-medium flex items-center justify-center space-x-2 hover:bg-gray-50 transition disabled:opacity-50 text-sm sm:text-base"
+              className={`flex-1 py-3 text-center font-semibold text-sm sm:text-base border-b-2 transition-colors ${
+                authModalTab === 'login' ? 'border-purple-600 text-purple-700' : 'border-transparent text-gray-500 hover:text-gray-700'
+              }`}
+              onClick={() => { setAuthModalTab('login'); setAuthError(''); setAuthSuccess(''); }}
             >
-              <FcGoogle size={18} className="sm:w-5 sm:h-5" />
-              <span>{loading ? 'Connecting...' : 'Continue with Google'}</span>
+              Sign In
             </button>
-            
-            <div className="text-center mt-3 sm:mt-4">
-              <span className="text-gray-600 text-sm">Don&apos;t have an account? </span>
-              <button
-                type="button"
-                onClick={() => {
-                  setIsLoginModalOpen(false);
-                  setIsSignupModalOpen(true);
-                  setAuthError('');
-                  setAuthSuccess('');
-                }}
-                className="text-purple-600 hover:text-purple-700 font-medium text-sm"
-              >
-                Sign up
-              </button>
-            </div>
-          </form>
-        </div>
-      </Modal>
-
-      {/* Signup Modal */}
-      <Modal isOpen={isSignupModalOpen} onClose={() => setIsSignupModalOpen(false)}>
-        <div className="p-6 sm:p-8">
-          <div className="mb-4 sm:mb-6 flex justify-center">
-            <BrandPawaLogo href="" size="md" />
+            <button
+              type="button"
+              className={`flex-1 py-3 text-center font-semibold text-sm sm:text-base border-b-2 transition-colors ${
+                authModalTab === 'signup' ? 'border-purple-600 text-purple-700' : 'border-transparent text-gray-500 hover:text-gray-700'
+              }`}
+              onClick={() => { setAuthModalTab('signup'); setAuthError(''); setAuthSuccess(''); }}
+            >
+              Create Account
+            </button>
           </div>
-          <h3 className="text-xl sm:text-2xl font-bold text-center mb-2">Create Account</h3>
-          <p className="text-sm sm:text-base text-gray-600 text-center mb-6 sm:mb-8">Start your brand&apos;s journey today</p>
+          
+          <p className="text-sm sm:text-base text-gray-600 text-center mb-6">
+            {authModalTab === 'login' ? 'Access your brand Workspace' : "Start your brand's journey today"}
+          </p>
           
           {authError && (
-            <div className="mb-3 sm:mb-4 p-2.5 sm:p-3 bg-red-50 border border-red-200 text-red-600 rounded-lg text-xs sm:text-sm">
+            <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-600 rounded-lg text-sm">
               {authError}
             </div>
           )}
 
           {authSuccess && (
-            <div className="mb-3 sm:mb-4 p-2.5 sm:p-3 bg-green-50 border border-green-200 text-green-600 rounded-lg text-xs sm:text-sm">
+            <div className="mb-4 p-3 bg-green-50 border border-green-200 text-green-600 rounded-lg text-sm">
               {authSuccess}
             </div>
           )}
           
-          <form onSubmit={handleSignup} className="space-y-3 sm:space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1 sm:mb-2">
-                Full Name
-              </label>
-              <input
-                type="text"
-                value={signupName}
-                onChange={(e) => setSignupName(e.target.value)}
-                className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm sm:text-base"
-                placeholder="John Smith"
-                required
-              />
-            </div>
-            
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1 sm:mb-2">
-                Email Address
-              </label>
-              <input
-                type="email"
-                value={signupEmail}
-                onChange={(e) => setSignupEmail(e.target.value)}
-                className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm sm:text-base"
-                placeholder="you@company.com"
-                required
-              />
-            </div>
-            
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1 sm:mb-2">
-                Password
-              </label>
-              <div className="relative">
+          {authModalTab === 'login' ? (
+            <form onSubmit={handleLogin} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1 sm:mb-2">
+                  Email Address
+                </label>
                 <input
-                  type={showSignupPassword ? "text" : "password"}
-                  value={signupPassword}
-                  onChange={(e) => setSignupPassword(e.target.value)}
-                  className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm sm:text-base pr-10"
-                  placeholder="••••••••"
-                  required
-                  minLength={6}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowSignupPassword(!showSignupPassword)}
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-gray-700"
-                >
-                  {showSignupPassword ? <FiEyeOff size={18} /> : <FiEyeIcon size={18} />}
-                </button>
-              </div>
-              <p className="text-xs text-gray-500 mt-1">Must be at least 6 characters</p>
-            </div>
-            
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1 sm:mb-2">
-                Confirm Password
-              </label>
-              <div className="relative">
-                <input
-                  type={showConfirmPassword ? "text" : "password"}
-                  value={signupConfirmPassword}
-                  onChange={(e) => setSignupConfirmPassword(e.target.value)}
-                  className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm sm:text-base pr-10"
-                  placeholder="••••••••"
+                  type="email"
+                  value={loginEmail}
+                  onChange={(e) => setLoginEmail(e.target.value)}
+                  className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm sm:text-base"
+                  placeholder="you@company.com"
                   required
                 />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1 sm:mb-2">
+                  Password
+                </label>
+                <div className="relative">
+                  <input
+                    type={showLoginPassword ? "text" : "password"}
+                    value={loginPassword}
+                    onChange={(e) => setLoginPassword(e.target.value)}
+                    className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm sm:text-base pr-10"
+                    placeholder="••••••••"
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowLoginPassword(!showLoginPassword)}
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-gray-700"
+                  >
+                    {showLoginPassword ? <FiEyeOff size={18} /> : <FiEyeIcon size={18} />}
+                  </button>
+                </div>
+              </div>
+              
+              <div className="flex items-center justify-between text-sm">
+                <label className="flex items-center space-x-2">
+                  <input type="checkbox" className="rounded text-purple-600 w-4 h-4" />
+                  <span className="text-gray-600">Remember me</span>
+                </label>
                 <button
                   type="button"
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-gray-700"
+                  onClick={() => {
+                    if (!loginEmail) {
+                      setAuthError('Please enter your email first');
+                      return;
+                    }
+                    // Handle password reset
+                    supabase.auth.resetPasswordForEmail(loginEmail, {
+                      redirectTo: `${window.location.origin}/auth/reset-password`,
+                    }).then(() => {
+                      setAuthSuccess('Password reset email sent! Check your inbox.');
+                    }).catch((error) => {
+                      setAuthError(error.message);
+                    });
+                  }}
+                  className="text-purple-600 hover:text-purple-700 text-sm"
                 >
-                  {showConfirmPassword ? <FiEyeOff size={18} /> : <FiEyeIcon size={18} />}
+                  Forgot password?
                 </button>
               </div>
-            </div>
-            
-            <label className="flex items-start space-x-2 text-xs sm:text-sm">
-              <input 
-                type="checkbox" 
-                className="mt-0.5 sm:mt-1 rounded text-purple-600 w-4 h-4" 
-                required 
-              />
-              <span className="text-gray-600">
-                I agree to the{' '}
-                <Link href="/terms" className="text-purple-600 hover:text-purple-700">
-                  Terms of Service
-                </Link>{' '}
-                and{' '}
-                <Link href="/privacy" className="text-purple-600 hover:text-purple-700">
-                  Privacy Policy
-                </Link>
-              </span>
-            </label>
-            
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full py-2.5 sm:py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-xl font-semibold hover:shadow-lg transition disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base"
-            >
-              {loading ? 'Creating Account...' : 'Create Account'}
-            </button>
-            
-            <div className="relative my-4 sm:my-6">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-300"></div>
-              </div>
-              <div className="relative flex justify-center text-xs sm:text-sm">
-                <span className="px-2 bg-white text-gray-500">Or continue with</span>
-              </div>
-            </div>
-            
-            <div>
+              
               <button
-                type="button"
-                onClick={handleGoogleLogin}
+                type="submit"
                 disabled={loading}
-                className="w-full py-2.5 sm:py-3 border border-gray-300 rounded-xl font-medium flex items-center justify-center space-x-2 hover:bg-gray-50 transition disabled:opacity-50 text-sm sm:text-base"
+                className="w-full py-2.5 sm:py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-xl font-semibold hover:shadow-lg transition disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base"
               >
-                <FcGoogle size={18} className="sm:w-5 sm:h-5" />
-                <span>Google</span>
+                {loading ? 'Signing in...' : 'Sign In to Workspace'}
               </button>
-            </div>
-            
-            <div className="text-center mt-3 sm:mt-4">
-              <span className="text-gray-600 text-sm">Already have an account? </span>
+            </form>
+          ) : (
+            <form onSubmit={handleSignup} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1 sm:mb-2">
+                  Full Name
+                </label>
+                <input
+                  type="text"
+                  value={signupName}
+                  onChange={(e) => setSignupName(e.target.value)}
+                  className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm sm:text-base"
+                  placeholder="John Smith"
+                  required
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1 sm:mb-2">
+                  Email Address
+                </label>
+                <input
+                  type="email"
+                  value={signupEmail}
+                  onChange={(e) => setSignupEmail(e.target.value)}
+                  className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm sm:text-base"
+                  placeholder="you@company.com"
+                  required
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1 sm:mb-2">
+                  Password
+                </label>
+                <div className="relative">
+                  <input
+                    type={showSignupPassword ? "text" : "password"}
+                    value={signupPassword}
+                    onChange={(e) => setSignupPassword(e.target.value)}
+                    className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm sm:text-base pr-10"
+                    placeholder="••••••••"
+                    required
+                    minLength={6}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowSignupPassword(!showSignupPassword)}
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-gray-700"
+                  >
+                    {showSignupPassword ? <FiEyeOff size={18} /> : <FiEyeIcon size={18} />}
+                  </button>
+                </div>
+                <p className="text-xs text-gray-500 mt-1">Must be at least 6 characters</p>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1 sm:mb-2">
+                  Confirm Password
+                </label>
+                <div className="relative">
+                  <input
+                    type={showConfirmPassword ? "text" : "password"}
+                    value={signupConfirmPassword}
+                    onChange={(e) => setSignupConfirmPassword(e.target.value)}
+                    className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm sm:text-base pr-10"
+                    placeholder="••••••••"
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-gray-700"
+                  >
+                    {showConfirmPassword ? <FiEyeOff size={18} /> : <FiEyeIcon size={18} />}
+                  </button>
+                </div>
+              </div>
+              
+              <label className="flex items-start space-x-2 text-xs sm:text-sm">
+                <input 
+                  type="checkbox" 
+                  className="mt-0.5 sm:mt-1 rounded text-purple-600 w-4 h-4" 
+                  required 
+                />
+                <span className="text-gray-600">
+                  I agree to the{' '}
+                  <Link href="/terms" className="text-purple-600 hover:text-purple-700">
+                    Terms of Service
+                  </Link>{' '}
+                  and{' '}
+                  <Link href="/privacy" className="text-purple-600 hover:text-purple-700">
+                    Privacy Policy
+                  </Link>
+                </span>
+              </label>
+              
               <button
-                type="button"
-                onClick={() => {
-                  setIsSignupModalOpen(false);
-                  setIsLoginModalOpen(true);
-                  setAuthError('');
-                  setAuthSuccess('');
-                }}
-                className="text-purple-600 hover:text-purple-700 font-medium text-sm"
+                type="submit"
+                disabled={loading}
+                className="w-full py-2.5 sm:py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-xl font-semibold hover:shadow-lg transition disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base"
               >
-                Sign in
+                {loading ? 'Creating Account...' : 'Create Account'}
               </button>
+            </form>
+          )}
+
+          <div className="relative my-6">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-gray-300"></div>
             </div>
-          </form>
+            <div className="relative flex justify-center text-sm">
+              <span className="px-2 bg-white text-gray-500">Or continue with</span>
+            </div>
+          </div>
+          
+          <button
+            type="button"
+            onClick={handleGoogleLogin}
+            disabled={loading}
+            className="w-full py-2.5 sm:py-3 border border-gray-300 rounded-xl font-medium flex items-center justify-center space-x-2 hover:bg-gray-50 transition disabled:opacity-50 text-sm sm:text-base"
+          >
+            <FcGoogle size={18} className="sm:w-5 sm:h-5" />
+            <span>Google</span>
+          </button>
         </div>
       </Modal>
     </div>
