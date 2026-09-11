@@ -404,7 +404,7 @@ export default function OnboardingDiagnostic() {
             <div className="mt-5">
               {isLoggedIn ? (
                 <button
-                  onClick={() => router.push('/dashboard')}
+                  onClick={() => router.push('/dashboard/diagnostic/1?migrate=true')}
                   className="w-full py-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl font-bold text-base shadow-lg hover:shadow-xl transition transform hover:-translate-y-0.5 flex items-center justify-center gap-2"
                 >
                   <span>Go to Dashboard</span>
@@ -413,7 +413,7 @@ export default function OnboardingDiagnostic() {
               ) : (
                 <button
                   onClick={() => {
-                    router.push('/?auth=signup&redirect=dashboard');
+                    router.push(`/?auth=signup&redirect=${encodeURIComponent('/dashboard/diagnostic/1?migrate=true')}`);
                   }}
                   className="w-full py-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl font-bold text-base shadow-lg hover:shadow-xl transition transform hover:-translate-y-0.5 flex items-center justify-center gap-2"
                 >
@@ -426,7 +426,7 @@ export default function OnboardingDiagnostic() {
                 <p className="text-center text-xs text-gray-500 mt-3">
                   Already have an account?{' '}
                   <button
-                    onClick={() => router.push('/?auth=login&redirect=dashboard')}
+                    onClick={() => router.push(`/?auth=login&redirect=${encodeURIComponent('/dashboard/diagnostic/1?migrate=true')}`)}
                     className="text-purple-600 font-semibold hover:underline"
                   >
                     Log in

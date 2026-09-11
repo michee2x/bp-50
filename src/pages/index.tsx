@@ -688,7 +688,13 @@ export default function HomePage() {
                 </div>
                 <div className="mt-6 flex flex-col gap-3 sm:flex-row">
                   <button
-                    onClick={() => router.push('/onboarding')}
+                    onClick={() => {
+                      if (sessionUser) {
+                        router.push('/dashboard/diagnostic/1');
+                      } else {
+                        router.push('/onboarding');
+                      }
+                    }}
                     className="site-primary-button justify-center sm:justify-start"
                   >
                     <span>Take the BrandPawa Test</span>
