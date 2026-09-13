@@ -200,7 +200,7 @@ export default function QuizListPage() {
         </div>
       </nav>
 
-      <main className="max-w-5xl mx-auto px-4 sm:px-6 py-10 md:py-14">
+      <main className="max-w-5xl mx-auto px-4 sm:px-6 pt-10 pb-32 md:pt-14 md:pb-40">
         {/* Header */}
         <div className="text-center mb-10">
           <span className="inline-block px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-xs font-semibold uppercase tracking-wider mb-3">
@@ -213,22 +213,6 @@ export default function QuizListPage() {
             Fast, focused quizzes that decode what fits your brand — from color psychology
             to platform strategy to brand personality.
           </p>
-        </div>
-
-        {/* Take Full Test CTA banner */}
-        <div className="mb-8 bg-gradient-to-r from-purple-600 to-pink-600 rounded-2xl p-5 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-lg">
-          <div className="text-white text-center sm:text-left">
-            <p className="font-bold text-lg">Want the complete picture?</p>
-            <p className="text-purple-100 text-sm mt-0.5">
-              The BrandPawa Test covers all 5 brand pillars in one go.
-            </p>
-          </div>
-          <Link
-            href="/onboarding"
-            className="flex-shrink-0 flex items-center gap-2 px-5 py-2.5 bg-white text-purple-700 font-semibold rounded-xl shadow hover:shadow-md transition text-sm"
-          >
-            Take the Full Test <FiArrowRight size={14} />
-          </Link>
         </div>
 
         {/* Category filter */}
@@ -304,6 +288,24 @@ export default function QuizListPage() {
           </div>
         )}
       </main>
+
+      {/* Fixed Bottom CTA banner */}
+      <div className="fixed bottom-0 left-0 right-0 z-50 p-4 pointer-events-none">
+        <div className="max-w-5xl mx-auto pointer-events-auto bg-gradient-to-r from-purple-600 to-pink-600 rounded-2xl p-5 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-2xl border border-white/20">
+          <div className="text-white text-center sm:text-left">
+            <p className="font-bold text-lg md:text-xl">Not sure where your brand stands right now?</p>
+            <p className="text-purple-100 text-sm md:text-base mt-1">
+              Get a complete, 360-degree audit across all 5 brand pillars in under 10 minutes.
+            </p>
+          </div>
+          <Link
+            href="/onboarding"
+            className="flex-shrink-0 flex items-center justify-center gap-2 w-full sm:w-auto px-6 py-3 bg-white text-purple-700 font-bold rounded-xl shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all text-sm md:text-base"
+          >
+            Take a BrandPawa Test <FiArrowRight size={16} className="text-purple-500" />
+          </Link>
+        </div>
+      </div>
     </div>
   );
 }
