@@ -18,42 +18,13 @@ import { BrandPawaLogo } from '../components/BrandPawaLogo';
 import { PublicFooter, PublicHeader } from '../components/PublicSiteChrome';
 import { LiveBrandWall } from '../components/LiveBrandWall';
 import { blogPosts } from '../data/blogPosts';
-import {
-  StartFlowGoal,
-  StartFlowIntent,
-  StartFlowProfileType,
-  getStartFlowRoute,
-  isStartFlowReady,
-  navigateToSavedStartFlow,
-  readStartFlowState,
-  saveStartFlowState,
-} from '../lib/startFlow';
 
-const startFlowIntentOptions: Array<{ value: StartFlowIntent; label: string; description: string }> = [
-  {
-    value: 'test',
-    label: 'Take the Brand Test',
-    description: 'Recommended. Start with the BrandPawa Test for a full picture of your brand strength.',
-  },
-  {
-    value: 'quiz',
-    label: 'Start with a Quick Quiz',
-    description: 'Jump into a faster discovery quiz if you want a lighter starting point.',
-  },
-];
 
-const startFlowProfileOptions: Array<{ value: StartFlowProfileType; label: string }> = [
-  { value: 'founder-business', label: 'Founder / Business' },
-  { value: 'creator', label: 'Creator' },
-  { value: 'professional', label: 'Professional' },
-];
 
-const startFlowGoalOptions: Array<{ value: StartFlowGoal; label: string }> = [
-  { value: 'clarity', label: 'Clarity' },
-  { value: 'growth', label: 'Growth' },
-  { value: 'positioning', label: 'Positioning' },
-  { value: 'visibility', label: 'Visibility' },
-];
+
+
+
+
 const Modal = ({ isOpen, onClose, children }: any) => {
     if (!isOpen) return null;
     return (
@@ -292,75 +263,6 @@ export default function HomePage() {
 
     return () => window.clearInterval(intervalId);
   }, [isStartFlowOpen, startFlowStep, welcomeHeadline]);
-
-  const openStartFlow = (intent: StartFlowIntent) => {
-    setStartFlowIntent(intent);
-    setAuthError('');
-    setAuthSuccess('');
-
-    if (!sessionUser) {
-      saveStartFlowState({
-        intent,
-        source: 'landing',
-        updatedAt: new Date().toISOString(),
-      });
-      setIsLoginModalOpen(false);
-      setIsSignupModalOpen(true);
-      return;
-    }
-
-    setStartFlowStep(0);
-    setIsStartFlowOpen(true);
-  };
-
-  const closeStartFlow = () => {
-    setIsStartFlowOpen(false);
-    setStartFlowStep(0);
-  };
-
-  const goToNextStartFlowStep = () => {
-    setStartFlowStep((current) => Math.min(current + 1, 2));
-  };
-
-  const goToPreviousStartFlowStep = () => {
-    setStartFlowStep((current) => Math.max(current - 1, 0));
-  };
-
-  const beginSavedExperience = async (intent: StartFlowIntent) => {
-    await router.push(getStartFlowRoute(intent));
-  };
-
-  const saveGuidedStartFlow = () => {
-    saveStartFlowState({
-      intent: startFlowIntent,
-      profileType: startFlowProfileType,
-      goal: startFlowGoal,
-      brandName: startFlowBrandName.trim() || undefined,
-      source: 'landing',
-      updatedAt: new Date().toISOString(),
-    });
-  };
-
-  const startExperience = async (mode: 'signup' | 'login' | 'direct' = 'direct') => {
-    saveGuidedStartFlow();
-
-    if (sessionUser) {
-      closeStartFlow();
-      await beginSavedExperience(startFlowIntent);
-      return;
-    }
-
-    closeStartFlow();
-
-    if (mode === 'login') {
-      setIsLoginModalOpen(true);
-      return;
-    }
-
-    if (mode === 'signup') {
-      setIsSignupModalOpen(true);
-    }
-  };
 
   const handleContactSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -1228,7 +1130,7 @@ export default function HomePage() {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <button
-              onClick={() => openStartFlow('test')}
+              onClick={() => { if (sessionUser) { router.push('/dashboard/diagnostic/1'); } else { router.push('/onboarding'); } }}
               className="px-6 sm:px-8 py-3 sm:py-4 bg-white text-purple-600 rounded-xl text-base sm:text-lg font-semibold hover:shadow-xl transition"
             >
               Take the BrandPawa Test
@@ -1304,215 +1206,6 @@ export default function HomePage() {
           {waitlistMessage && (
             <div className="mt-4 rounded-xl bg-green-50 px-4 py-3 text-sm text-green-700">
               {waitlistMessage}
-            </div>
-          )}
-        </div>
-      </Modal>
-
-      <Modal isOpen={isStartFlowOpen} onClose={closeStartFlow}>
-        <div className="p-6 sm:p-8">
-          {startFlowStep === 0 && (
-            <div className="text-center">
-              <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-white shadow-lg ring-1 ring-purple-100">
-                <BrandPawaLogo href="" size="sm" />
-              </div>
-              <p className="text-xs font-semibold uppercase tracking-[0.28em] text-purple-600">Guided Start</p>
-              <h3 className="mt-3 min-h-[3.5rem] text-2xl font-bold text-slate-900 sm:text-3xl">
-                {typedWelcomeHeadline || '\u00A0'}
-              </h3>
-              <p className="mt-4 text-sm leading-7 text-slate-600 sm:text-base">
-                We&apos;ll ask a few quick questions to understand your brand and recommend the right path.
-              </p>
-              <p className="mt-3 text-xs font-medium uppercase tracking-[0.22em] text-slate-400">
-                Takes less than 2 minutes
-              </p>
-              <button
-                type="button"
-                onClick={goToNextStartFlowStep}
-                className="mt-8 inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-purple-500 to-pink-500 px-5 py-3 font-semibold text-white transition hover:shadow-lg"
-              >
-                <span>Start</span>
-                <FiArrowRight />
-              </button>
-            </div>
-          )}
-
-          {startFlowStep === 1 && (
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-purple-600">Step 1 of 2</p>
-              <h3 className="mt-3 text-2xl font-bold text-slate-900">How do you want to start?</h3>
-              <p className="mt-3 text-sm text-slate-600">
-                We&apos;ve suggested a starting point based on where you came from.
-              </p>
-
-              <div className="mt-6 space-y-3">
-                {startFlowIntentOptions.map((option) => {
-                  const isSelected = startFlowIntent === option.value;
-                  return (
-                    <button
-                      key={option.value}
-                      type="button"
-                      onClick={() => setStartFlowIntent(option.value)}
-                      className={`w-full rounded-2xl border p-4 text-left transition ${
-                        isSelected
-                          ? 'border-purple-400 bg-purple-50 shadow-sm'
-                          : 'border-slate-200 bg-white hover:border-purple-200 hover:bg-purple-50/40'
-                      }`}
-                    >
-                      <div className="flex items-start justify-between gap-3">
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <span className="font-semibold text-slate-900">{option.label}</span>
-                            {option.value === 'test' && (
-                              <span className="rounded-full bg-purple-100 px-2 py-1 text-[11px] font-semibold uppercase tracking-[0.15em] text-purple-700">
-                                Recommended
-                              </span>
-                            )}
-                          </div>
-                          <p className="mt-2 text-sm text-slate-600">{option.description}</p>
-                        </div>
-                        <div
-                          className={`mt-1 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full border ${
-                            isSelected ? 'border-purple-500 bg-purple-500 text-white' : 'border-slate-300'
-                          }`}
-                        >
-                          {isSelected && <FiCheck className="h-3.5 w-3.5" />}
-                        </div>
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
-
-              <div className="mt-8 flex gap-3">
-                <button
-                  type="button"
-                  onClick={goToPreviousStartFlowStep}
-                  className="flex-1 rounded-2xl border border-slate-200 px-4 py-3 font-semibold text-slate-700 transition hover:bg-slate-50"
-                >
-                  Back
-                </button>
-                <button
-                  type="button"
-                  onClick={goToNextStartFlowStep}
-                  className="flex-1 rounded-2xl bg-gradient-to-r from-purple-500 to-pink-500 px-4 py-3 font-semibold text-white transition hover:shadow-lg"
-                >
-                  Continue
-                </button>
-              </div>
-            </div>
-          )}
-
-          {startFlowStep === 2 && (
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-purple-600">Step 2 of 2</p>
-              <h3 className="mt-3 text-2xl font-bold text-slate-900">Tell us about yourself so we can guide you right</h3>
-              <p className="mt-3 text-sm text-slate-600">
-                A little context helps BrandPawa guide you with more intention from the start.
-              </p>
-
-              <div className="mt-6 space-y-6">
-                <div>
-                  <label className="mb-3 block text-sm font-semibold text-slate-900">What best describes you?</label>
-                  <div className="grid gap-3 sm:grid-cols-3">
-                    {startFlowProfileOptions.map((option) => {
-                      const isSelected = startFlowProfileType === option.value;
-                      return (
-                        <button
-                          key={option.value}
-                          type="button"
-                          onClick={() => setStartFlowProfileType(option.value)}
-                          className={`rounded-2xl border px-4 py-4 text-sm font-semibold transition ${
-                            isSelected
-                              ? 'border-purple-400 bg-purple-50 text-purple-700'
-                              : 'border-slate-200 text-slate-700 hover:border-purple-200 hover:bg-purple-50/40'
-                          }`}
-                        >
-                          {option.label}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                <div>
-                  <label className="mb-3 block text-sm font-semibold text-slate-900">What&apos;s your primary goal?</label>
-                  <div className="grid gap-3 sm:grid-cols-2">
-                    {startFlowGoalOptions.map((option) => {
-                      const isSelected = startFlowGoal === option.value;
-                      return (
-                        <button
-                          key={option.value}
-                          type="button"
-                          onClick={() => setStartFlowGoal(option.value)}
-                          className={`rounded-2xl border px-4 py-4 text-sm font-semibold transition ${
-                            isSelected
-                              ? 'border-purple-400 bg-purple-50 text-purple-700'
-                              : 'border-slate-200 text-slate-700 hover:border-purple-200 hover:bg-purple-50/40'
-                          }`}
-                        >
-                          {option.label}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                <div>
-                  <label className="mb-2 block text-sm font-semibold text-slate-900">Brand name</label>
-                  <input
-                    type="text"
-                    value={startFlowBrandName}
-                    onChange={(event) => setStartFlowBrandName(event.target.value)}
-                    placeholder="Optional"
-                    className="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm text-slate-900 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-purple-500"
-                  />
-                </div>
-              </div>
-
-              <div className="mt-8 rounded-2xl bg-slate-50 p-4 text-sm text-slate-600">
-                {startFlowIntent === 'test'
-                  ? 'You’ll go straight into the BrandPawa Test after this.'
-                  : 'You’ll go straight into a quick quiz after this.'}
-              </div>
-
-              <div className="mt-6 flex flex-col gap-3">
-                {sessionUser ? (
-                  <button
-                    type="button"
-                    onClick={() => startExperience('direct')}
-                    className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-purple-500 to-pink-500 px-5 py-3 font-semibold text-white transition hover:shadow-lg"
-                  >
-                    <span>{startFlowIntent === 'test' ? 'Start BrandPawa Test' : 'Start Quick Quiz'}</span>
-                    <FiArrowRight />
-                  </button>
-                ) : (
-                  <>
-                    <button
-                      type="button"
-                      onClick={() => startExperience('signup')}
-                      className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-purple-500 to-pink-500 px-5 py-3 font-semibold text-white transition hover:shadow-lg"
-                    >
-                      <span>Get Started Free</span>
-                      <FiArrowRight />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => startExperience('login')}
-                      className="rounded-2xl border border-slate-200 px-5 py-3 text-sm font-medium text-slate-500 transition hover:bg-slate-50"
-                    >
-                      Already have an account? Sign in
-                    </button>
-                  </>
-                )}
-                <button
-                  type="button"
-                  onClick={goToPreviousStartFlowStep}
-                  className="rounded-2xl px-5 py-3 text-sm font-medium text-slate-500 transition hover:bg-slate-50"
-                >
-                  Back
-                </button>
-              </div>
             </div>
           )}
         </div>

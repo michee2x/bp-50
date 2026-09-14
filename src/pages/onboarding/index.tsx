@@ -413,7 +413,7 @@ export default function OnboardingDiagnostic() {
               ) : (
                 <button
                   onClick={() => {
-                    router.push(`/?auth=signup&redirect=${encodeURIComponent('/dashboard/diagnostic/1?migrate=true')}`);
+                    router.push(`/?auth=signup&redirect=${encodeURIComponent('/setup')}`);
                   }}
                   className="w-full py-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl font-bold text-base shadow-lg hover:shadow-xl transition transform hover:-translate-y-0.5 flex items-center justify-center gap-2"
                 >

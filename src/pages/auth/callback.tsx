@@ -1,9 +1,7 @@
-// src/pages/auth/callback.tsx
 import { useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { supabase } from '../../lib/supabase';
 import { BrandLoader } from '../../components/BrandLoader';
-import { isStartFlowReady, navigateToSavedStartFlow, readStartFlowState } from '../../lib/startFlow';
 
 export default function AuthCallback() {
   const router = useRouter();
@@ -19,14 +17,8 @@ export default function AuthCallback() {
       }
 
       if (session) {
-        const startFlow = readStartFlowState();
-
-        if (startFlow && !isStartFlowReady(startFlow)) {
-          router.replace('/');
-          return;
-        }
-
-        await navigateToSavedStartFlow(router);
+        const redirectPath = router.query.redirect || '/dashboard';
+        router.replace(redirectPath as string);
       } else {
         // No session, redirect to login
         router.replace('/');
