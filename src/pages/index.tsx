@@ -1,4 +1,3 @@
-// src/pages/index.tsx
 import Link from 'next/link';
 import { useState, FormEvent, useEffect } from 'react';
 import { useRouter } from 'next/router';
@@ -18,6 +17,15 @@ import { BrandPawaLogo } from '../components/BrandPawaLogo';
 import { PublicFooter, PublicHeader } from '../components/PublicSiteChrome';
 import { LiveBrandWall } from '../components/LiveBrandWall';
 import { blogPosts } from '../data/blogPosts';
+import {
+  type StartFlowIntent,
+  type StartFlowProfileType,
+  type StartFlowGoal,
+  readStartFlowState,
+  isStartFlowReady,
+  navigateToSavedStartFlow,
+} from '../lib/startFlow';
+
 
 
 

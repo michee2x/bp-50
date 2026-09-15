@@ -216,11 +216,13 @@ export default function QuizListPage() {
         </div>
 
         {/* Category filter */}
+        <div className="flex flex-wrap gap-2 mb-8">
         <div className="flex gap-2 mb-8 overflow-x-auto pb-1 scrollbar-hide">
           {CATEGORIES.map((cat) => (
             <button
               key={cat}
               onClick={() => setSelectedCategory(cat)}
+              className={`px-4 py-1.5 rounded-full text-sm font-medium transition ${
               className={`flex-shrink-0 px-4 py-1.5 rounded-full text-sm font-medium transition ${
                 selectedCategory === cat
                   ? 'bg-purple-600 text-white shadow'
@@ -290,9 +292,13 @@ export default function QuizListPage() {
       </main>
 
       {/* Fixed Bottom CTA banner */}
+      <div className="fixed bottom-0 left-0 right-0 z-50 p-4 pointer-events-none">
+        <div className="max-w-5xl mx-auto pointer-events-auto bg-gradient-to-r from-purple-600 to-pink-600 rounded-2xl p-5 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-2xl border border-white/20">
       <div className="fixed bottom-0 left-0 right-0 z-50 bg-gradient-to-r from-purple-600 to-pink-600 shadow-2xl border-t border-white/20">
         <div className="max-w-5xl mx-auto px-4 py-4 flex flex-col sm:flex-row items-center justify-between gap-3">
           <div className="text-white text-center sm:text-left">
+            <p className="font-bold text-lg md:text-xl">Not sure where your brand stands right now?</p>
+            <p className="text-purple-100 text-sm md:text-base mt-1">
             <p className="font-bold text-base md:text-lg">Not sure where your brand stands right now?</p>
             <p className="text-purple-100 text-xs md:text-sm mt-0.5">
               Get a complete, 360-degree audit across all 5 brand pillars in under 10 minutes.
@@ -300,6 +306,7 @@ export default function QuizListPage() {
           </div>
           <Link
             href="/onboarding"
+            className="flex-shrink-0 flex items-center justify-center gap-2 w-full sm:w-auto px-6 py-3 bg-white text-purple-700 font-bold rounded-xl shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all text-sm md:text-base"
             className="flex-shrink-0 flex items-center justify-center gap-2 w-full sm:w-auto px-6 py-2.5 bg-white text-purple-700 font-bold rounded-xl shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all text-sm md:text-base"
           >
             Take a BrandPawa Test <FiArrowRight size={16} className="text-purple-500" />
