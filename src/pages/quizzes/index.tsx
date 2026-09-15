@@ -216,13 +216,11 @@ export default function QuizListPage() {
         </div>
 
         {/* Category filter */}
-        <div className="flex flex-wrap gap-2 mb-8">
         <div className="flex gap-2 mb-8 overflow-x-auto pb-1 scrollbar-hide">
           {CATEGORIES.map((cat) => (
             <button
               key={cat}
               onClick={() => setSelectedCategory(cat)}
-              className={`px-4 py-1.5 rounded-full text-sm font-medium transition ${
               className={`flex-shrink-0 px-4 py-1.5 rounded-full text-sm font-medium transition ${
                 selectedCategory === cat
                   ? 'bg-purple-600 text-white shadow'
