@@ -172,11 +172,11 @@ export default function QuizListPage() {
 
       {/* Nav */}
       <nav className="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-gray-100 shadow-sm">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
-          <Link href="/">
-            <BrandPawaLogo className="h-8 w-auto text-purple-600" />
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between gap-2">
+          <Link href="/" className="flex-shrink min-w-0">
+            <BrandPawaLogo className="h-6 sm:h-8 w-auto text-purple-600" />
           </Link>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1.5 sm:gap-3 flex-shrink-0">
             <Link
               href="/onboarding"
               className="text-sm font-medium text-gray-600 hover:text-purple-700 transition hidden sm:block"
@@ -185,16 +185,16 @@ export default function QuizListPage() {
             </Link>
             <button
               onClick={() => router.push('/?auth=signup')}
-              className="whitespace-nowrap flex-shrink-0 px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl text-sm font-semibold shadow hover:shadow-lg transition"
+              className="whitespace-nowrap flex-shrink-0 px-3 py-1.5 sm:px-4 sm:py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl text-xs sm:text-sm font-semibold shadow hover:shadow-lg transition"
             >
               Get Started
             </button>
             <button
               onClick={() => router.push('/')}
-              className="p-2 text-gray-400 hover:text-gray-700 rounded-lg hover:bg-gray-100 transition"
+              className="p-1 sm:p-2 text-gray-400 hover:text-gray-700 rounded-lg hover:bg-gray-100 transition flex-shrink-0"
               aria-label="Go back to homepage"
             >
-              <FiX size={20} />
+              <FiX className="w-5 h-5 sm:w-5 sm:h-5" />
             </button>
           </div>
         </div>
