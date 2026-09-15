@@ -1,3 +1,4 @@
+// src/pages/index.tsx
 import Link from 'next/link';
 import { useState, FormEvent, useEffect } from 'react';
 import { useRouter } from 'next/router';

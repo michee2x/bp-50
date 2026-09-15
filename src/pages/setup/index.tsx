@@ -63,6 +63,18 @@ export default function SetupProfiling() {
         });
 
         // Try to update profiles table
+        await supabase
+          .from('profiles')
+          .update({
+            role: role,
+            goal: goal,
+            focus: selectedFocus,
+            onboarding_completed: true
+          })
+          .eq('id', user.id)
+          .catch(() => {
+            console.log("Profile table update skipped - relying on metadata");
+          });
         try {
           await supabase
             .from('profiles')

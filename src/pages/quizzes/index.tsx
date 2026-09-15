@@ -185,7 +185,7 @@ export default function QuizListPage() {
             </Link>
             <button
               onClick={() => router.push('/?auth=signup')}
-              className="px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl text-sm font-semibold shadow hover:shadow-lg transition"
+              className="whitespace-nowrap flex-shrink-0 px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl text-sm font-semibold shadow hover:shadow-lg transition"
             >
               Get Started
             </button>
