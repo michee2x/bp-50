@@ -603,7 +603,7 @@ export default function BrandPersonalityQuiz() {
     setShareError('');
     try {
       const pairKey = `${primaryKey}_${secondaryKey}` as PairKey;
-      const positioning = POSITIONING_MATRIX[pairKey];
+      const positioning = POSITIONING_MATRIX[pairKey] || { identity: 'Brand', signature: '' };
       const primaryMeta = ARCHETYPE_META[primaryKey];
       const secondaryMeta = ARCHETYPE_META[secondaryKey];
       const userName = userProfile?.full_name || user?.email?.split('@')[0] || 'Your Brand';
@@ -637,7 +637,7 @@ export default function BrandPersonalityQuiz() {
   const handleSocialShare = (platform: 'twitter' | 'linkedin' | 'whatsapp') => {
     if (!primaryKey || !secondaryKey) return;
     const pairKey = `${primaryKey}_${secondaryKey}` as PairKey;
-    const positioning = POSITIONING_MATRIX[pairKey];
+    const positioning = POSITIONING_MATRIX[pairKey] || { identity: 'Brand', signature: '' };
     openSocialComposer(platform, {
       title: `My Brand Personality: ${positioning.identity}`,
       text: `Just discovered my brand archetype — ${ARCHETYPE_META[primaryKey].label} + ${ARCHETYPE_META[secondaryKey].label} = ${positioning.identity}. Find yours at`,
@@ -659,7 +659,7 @@ export default function BrandPersonalityQuiz() {
 
   const progress = showResults ? 100 : Math.round((Object.keys(answers).length / QUESTIONS.length) * 100);
   const pairKey = primaryKey && secondaryKey ? `${primaryKey}_${secondaryKey}` as PairKey : null;
-  const positioning = pairKey ? POSITIONING_MATRIX[pairKey] : null;
+  const positioning = pairKey ? (POSITIONING_MATRIX[pairKey] || { identity: 'Brand', signature: '' }) : null;
   const primaryMeta = primaryKey ? ARCHETYPE_META[primaryKey] : null;
   const secondaryMeta = secondaryKey ? ARCHETYPE_META[secondaryKey] : null;
   const proPlaybook = primaryKey ? PRO_PLAYBOOK[primaryKey] : null;
