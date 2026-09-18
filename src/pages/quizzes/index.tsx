@@ -194,7 +194,7 @@ export default function QuizListPage() {
               className="p-1 sm:p-2 text-gray-400 hover:text-gray-700 rounded-lg hover:bg-gray-100 transition flex-shrink-0"
               aria-label="Go back to homepage"
             >
-              <FiX className="w-5 h-5 sm:w-5 sm:h-5" />
+              <FiX className="w-5 h-5" />
             </button>
           </div>
         </div>

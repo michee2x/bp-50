@@ -4,6 +4,10 @@ import { useState, FormEvent, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { supabase } from '../lib/supabase';
 import {
+  X as XIcon,
+  Check as CheckIcon
+} from 'lucide-react';
+import {
   FiX, FiCheck, FiArrowRight, FiUsers,
   FiBarChart2, FiDownload,
   FiTrendingUp, FiTarget, FiEye, FiPlay,
@@ -17,6 +21,7 @@ import { MdColorLens } from 'react-icons/md';
 import { BrandPawaLogo } from '../components/BrandPawaLogo';
 import { PublicFooter, PublicHeader } from '../components/PublicSiteChrome';
 import { LiveBrandWall } from '../components/LiveBrandWall';
+import { FlipWords } from '../components/ui/flip-words';
 import { blogPosts } from '../data/blogPosts';
 import {
   type StartFlowIntent,
@@ -552,7 +557,15 @@ export default function HomePage() {
             ],
           },
         ]}
-
+        sessionUser={sessionUser}
+        onLoginClick={() => {
+          setAuthModalTab('login');
+          setIsAuthModalOpen(true);
+        }}
+        onLogout={async () => {
+          await supabase.auth.signOut();
+          router.push('/');
+        }}
         ctaPrimary={{
           label: sessionUser ? 'Dashboard' : 'Get Started',
           onClick: () => {
@@ -567,37 +580,48 @@ export default function HomePage() {
       />
 
       <main>
-        <section className="site-section">
+        <section className="relative overflow-hidden pb-12 pt-6 sm:pb-16 sm:pt-10 lg:pb-24 lg:pt-12">
+          {/* Background Glow */}
+          <div className="absolute left-0 top-0 -z-10 h-full w-full">
+            <div className="absolute left-[-10%] top-[-10%] h-[500px] w-[500px] rounded-full bg-[radial-gradient(circle_at_center,_rgba(168,85,247,0.15)_0%,_transparent_60%)] blur-3xl sm:h-[800px] sm:w-[800px]" />
+          </div>
+
           <div className="site-container">
-            <div className="grid items-center gap-8 lg:grid-cols-[1.15fr_0.85fr]">
-              <div>
-                <span className="mb-5 inline-flex rounded-full border border-purple-200 bg-white/90 px-4 py-2 text-sm font-semibold text-purple-700 shadow-sm">
-                  <span>The #1 Brand Operating System</span>
-                  <FiAward className="ml-2" />
-                </span>
-                <h1 className="max-w-4xl text-4xl font-bold leading-tight sm:text-5xl lg:text-6xl">
+            <div className="grid items-center gap-12 lg:grid-cols-[1.3fr_0.7fr] xl:grid-cols-[1.35fr_0.65fr]">
+              <div className="relative z-10 flex flex-col items-start text-left">
+                
+                {/* Badge (Launch-UI style) */}
+                <div className="mb-6 inline-flex items-center gap-3 rounded-full border border-slate-200/80 bg-white/50 px-3 py-1.5 text-sm font-medium text-slate-600 shadow-sm backdrop-blur-md transition-colors hover:bg-slate-50">
+                  <span className="font-semibold text-purple-600">The #1 Brand Operating System</span>
+                  <span className="h-4 w-px bg-slate-300"></span>
+                  <span className="flex items-center gap-1">Take the tour <FiArrowRight size={14} className="text-slate-400" /></span>
+                </div>
+
+                {/* Heading (Launch-UI style: huge, tight, bold) */}
+                <h1 className="w-full text-5xl font-bold tracking-tight text-slate-950 sm:text-6xl lg:text-[3.5rem] xl:text-[4.2rem] lg:leading-[1.1] whitespace-nowrap">
                   Build a Brand that Wins
                 </h1>
-                <p className="mt-6 max-w-3xl text-lg text-slate-700 sm:text-xl lg:text-2xl">
+
+                {/* Description (Launch-UI style) */}
+                <p className="mt-5 max-w-2xl text-lg font-medium leading-relaxed text-slate-600 sm:text-xl">
                   BrandPawa is the brand operating system for founders, creators, and businesses that intend to own attention, earn trust, and scale with precision.
                 </p>
-                <div className="mt-6 max-w-2xl">
-                  <div className="inline-flex items-center gap-3">
-                    <span className="h-2.5 w-2.5 rounded-full bg-purple-600 shadow-[0_0_0_6px_rgba(168,85,247,0.14)]" />
-                    <p className="text-xs font-bold uppercase tracking-[0.32em] text-purple-700">
-                      INSIDE BRANDPAWA
+
+                {/* Animated text block (FlipWords) */}
+                <div className="mt-8 max-w-2xl border-l-2 border-purple-500/30 pl-5">
+                  <div className="inline-flex items-center gap-2">
+                    <span className="h-2 w-2 rounded-full bg-purple-500 shadow-[0_0_8px_rgba(168,85,247,0.5)]" />
+                    <p className="text-[0.7rem] font-bold uppercase tracking-widest text-slate-500">
+                      Inside BrandPawa
                     </p>
                   </div>
-                  <div className="mt-4 min-h-[5rem] border-l-4 border-purple-500 pl-5 sm:pl-6">
-                    <p
-                      key={heroMessages[heroMessageIndex]}
-                      className="max-w-xl text-lg font-bold leading-8 text-slate-900 transition-all duration-500 sm:text-2xl sm:leading-10"
-                    >
-                      {heroMessages[heroMessageIndex]}
-                    </p>
+                  <div className="mt-3 text-lg font-semibold sm:text-xl">
+                    <FlipWords words={heroMessages} className="!text-slate-900 -ml-2" />
                   </div>
                 </div>
-                <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+
+                {/* Buttons (Launch-UI style buttons: rounded-md, h-11, px-8) */}
+                <div className="mt-10 flex flex-col w-full gap-4 sm:w-auto sm:flex-row">
                   <button
                     onClick={() => {
                       if (sessionUser) {
@@ -606,10 +630,10 @@ export default function HomePage() {
                         router.push('/onboarding');
                       }
                     }}
-                    className="site-primary-button justify-center sm:justify-start"
+                    className="inline-flex h-11 items-center justify-center gap-2 rounded-md bg-gradient-to-r from-purple-600 to-pink-500 px-8 text-sm font-semibold text-white shadow-[0_8px_20px_rgba(168,85,247,0.25)] transition-all hover:scale-[1.02] hover:shadow-[0_10px_25px_rgba(168,85,247,0.3)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-600 focus-visible:ring-offset-2"
                   >
-                    <span>Take the BrandPawa Test</span>
-                    <FiArrowRight className="transition-transform group-hover:translate-x-1" />
+                    Take the BrandPawa Test
+                    <FiArrowRight size={16} />
                   </button>
                   <button
                     onClick={() => {
@@ -619,74 +643,86 @@ export default function HomePage() {
                         router.push('/quizzes');
                       }
                     }}
-                    className="site-ghost-button justify-center sm:justify-start"
+                    className="inline-flex h-11 items-center justify-center gap-2 rounded-md border border-slate-200 bg-white px-8 text-sm font-semibold text-slate-900 shadow-sm transition-colors hover:bg-slate-50 hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-300 focus-visible:ring-offset-2"
                   >
-                    <span>Start a Quiz</span>
-                    <FiPlay />
+                    <FiPlay size={16} className="text-slate-500" />
+                    Start a Quiz
                   </button>
                 </div>
               </div>
 
-              <div className="site-card overflow-hidden p-4 sm:p-5">
-                <LiveBrandWall
-                  hideHeader
-                  compact
-                  showRecent={false}
-                />
+              {/* Right Side Mockup */}
+              <div className="relative z-10 mx-auto w-full max-w-[500px] lg:max-w-none">
+                {/* Mockup Frame style */}
+                <div className="overflow-hidden rounded-2xl border border-slate-200/60 bg-white/50 p-2 shadow-2xl backdrop-blur-sm sm:p-4">
+                  <div className="overflow-hidden rounded-xl border border-slate-100 bg-white">
+                    <LiveBrandWall
+                      hideHeader
+                      compact
+                      showRecent={false}
+                    />
+                  </div>
+                </div>
               </div>
             </div>
-
           </div>
         </section>
 
       {/* How It Works */}
       <section id="how-it-works" className="site-section bg-white/80">
         <div className="site-container">
-          <div className="mb-10 text-center">
-            <span className="inline-flex rounded-full bg-purple-100 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-purple-700">
+          <div className="mb-10 text-center flex flex-col items-center gap-4">
+            <span className="text-sm font-bold uppercase tracking-widest text-purple-600">
               Process
             </span>
-            <h2 className="mt-5 text-2xl sm:text-3xl md:text-4xl font-bold">
+            <h2 className="max-w-[640px] text-center text-4xl leading-tight font-semibold tracking-tight text-slate-950 sm:text-5xl sm:leading-tight">
               Brand Growth, Systemized
             </h2>
-            <p className="mx-auto mt-4 max-w-3xl text-base text-gray-600">
+            <p className="mx-auto mt-2 max-w-3xl text-lg font-medium text-slate-500">
               Most brands work hard but grow slow because they&apos;re guessing. BrandPawa replaces guesswork with structure, insight, and execution.
             </p>
           </div>
           
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8 max-w-6xl mx-auto">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8 max-w-[85rem] mx-auto">
             {[
               {
                 step: '01',
                 title: 'Measure Strength',
                 description: 'Take the BrandPawa Test to see where your brand really stands today.',
-                icon: <FiTarget className="w-6 h-6 sm:w-8 sm:h-8" />
+                icon: <FiTarget className="w-12 h-12 stroke-[1.5]" />
               },
               {
                 step: '02',
                 title: 'Discover Fit',
                 description: 'Quick quizzes reveal what works for your brand: the right colors, archetype, platform strategy, and visual style.',
-                icon: <FiBookOpen className="w-6 h-6 sm:w-8 sm:h-8" />
+                icon: <FiBookOpen className="w-12 h-12 stroke-[1.5]" />
               },
               {
                 step: '03',
                 title: 'Identify the Gap',
                 description: 'We show you what\'s working, what\'s missing, and what\'s quietly killing your growth.',
-                icon: <FiEye className="w-6 h-6 sm:w-8 sm:h-8" />
+                icon: <FiEye className="w-12 h-12 stroke-[1.5]" />
               },
               {
                 step: '04',
                 title: 'Execute with Precision',
                 description: 'Take action with guided challenges, systems, and next-step execution paths to close gaps and accelerate growth.',
-                icon: <FiZap className="w-6 h-6 sm:w-8 sm:h-8" />
+                icon: <FiZap className="w-12 h-12 stroke-[1.5]" />
               }
             ].map((step) => (
-              <div key={step.step} className="bg-gradient-to-b from-purple-50 to-white p-6 sm:p-8 rounded-2xl shadow-lg border border-purple-100">
-                <div className="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl flex items-center justify-center mb-4 sm:mb-6 text-white text-lg sm:text-xl font-bold">
-                  {step.step}
+              <div key={step.step} className="group flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm transition-shadow hover:shadow-md">
+                {/* Content Area */}
+                <div className="flex flex-1 flex-col p-6 sm:p-7">
+                  <div className="mb-4 text-xs font-bold uppercase tracking-widest text-purple-600">
+                    Step {step.step}
+                  </div>
+                  <h3 className="text-[1.15rem] font-semibold tracking-tight text-slate-900">
+                    {step.title}
+                  </h3>
+                  <p className="mt-3 text-sm font-medium leading-relaxed text-slate-500">
+                    {step.description}
+                  </p>
                 </div>
-                <h3 className="text-lg sm:text-xl font-bold mb-3 sm:mb-4">{step.title}</h3>
-                <p className="text-sm sm:text-base text-gray-600">{step.description}</p>
               </div>
             ))}
           </div>
@@ -694,67 +730,77 @@ export default function HomePage() {
       </section>
 
       {/* Why BrandPawa */}
-      <section id="about-us" className="site-section bg-gradient-to-b from-white to-gray-50/80">
+      <section id="about-us" className="py-24 sm:py-32 bg-slate-50/50">
         <div className="site-container">
-          <div className="max-w-6xl mx-auto">
-            <div className="mb-12 text-center">
-              <span className="inline-flex rounded-full bg-slate-100 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-slate-700">
+          <div className="max-w-[85rem] mx-auto">
+            
+            {/* Section Header */}
+            <div className="mb-16 flex flex-col items-center gap-4 text-center">
+              <span className="text-sm font-bold uppercase tracking-widest text-purple-600">
                 Why BrandPawa
               </span>
-              <h2 className="mt-5 text-2xl sm:text-3xl md:text-4xl font-bold">
+              <h2 className="max-w-[800px] text-center text-4xl leading-tight font-semibold tracking-tight text-slate-950 sm:text-5xl sm:leading-tight">
                 You&apos;re Doing the Work. So Why Isn&apos;t It Working?
               </h2>
-              <p className="mx-auto mt-4 max-w-3xl text-base text-slate-600">
+              <p className="mt-2 max-w-[650px] text-lg text-slate-500">
                 Most brands are active but not aligned. BrandPawa gives you the diagnosis, strategy, and systems to turn effort into outcomes.
               </p>
             </div>
-            <div className="grid gap-6 lg:grid-cols-[0.95fr_1.05fr]">
-              <div className="site-card p-6 sm:p-8">
-                <p className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-500">
+
+            {/* Comparison Cards Grid */}
+            <div className="grid gap-8 lg:grid-cols-2 items-stretch">
+              
+              {/* Left Card: The Problem */}
+              <div className="flex flex-col rounded-3xl border border-slate-200/80 bg-white p-8 sm:p-10 shadow-sm transition-shadow hover:shadow-md">
+                <p className="text-sm font-bold uppercase tracking-widest text-slate-400">
                   The Problem
                 </p>
-                <p className="mt-4 text-lg font-semibold text-slate-900">
+                <p className="mt-4 text-2xl font-bold tracking-tight text-slate-900">
                   Most brands don&apos;t know:
                 </p>
-                <div className="mt-8 space-y-4">
+                <div className="mt-8 flex flex-col gap-5">
                   {[
                     'Why they keep showing up but nothing converts',
                     'What’s actually blocking their growth',
                     'Where their credibility and positioning breaks down',
                     'What to fix first — before doing more'
                   ].map((item, index) => (
-                    <div key={index} className="flex items-start gap-3">
-                      <div className="mt-0.5 flex h-6 w-6 items-center justify-center rounded-full bg-red-100">
-                        <FiX className="h-3 w-3 text-red-500" />
+                    <div key={index} className="flex items-start gap-4">
+                      <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-red-50">
+                        <XIcon className="h-4 w-4 text-red-500 stroke-[2.5]" />
                       </div>
-                      <span className="text-slate-700">{item}</span>
+                      <span className="text-[1.05rem] text-slate-600 leading-snug pt-0.5">{item}</span>
                     </div>
                   ))}
                 </div>
               </div>
 
-              <div className="rounded-3xl bg-gradient-to-br from-purple-600 to-pink-600 p-6 text-white shadow-xl sm:p-8 md:p-10">
-                <p className="text-sm font-semibold uppercase tracking-[0.2em] text-white/70">What BrandPawa Changes</p>
-                <p className="mt-4 text-2xl font-bold">
+              {/* Right Card: The Solution */}
+              <div className="flex flex-col rounded-3xl border border-purple-500/20 bg-gradient-to-br from-purple-600 to-pink-600 p-8 sm:p-10 shadow-xl shadow-purple-500/10">
+                <p className="text-sm font-bold uppercase tracking-widest text-white/70">
+                  What BrandPawa Changes
+                </p>
+                <p className="mt-4 text-2xl font-bold tracking-tight text-white">
                   BrandPawa ends the guesswork.
                 </p>
-                <p className="mt-4 text-white/85">
+                <p className="mt-4 text-[1.05rem] leading-relaxed text-white/90">
                   We start with a diagnosis, not a template. Then we give you the strategy, execution system, and support to build a brand that compounds.
                 </p>
-                <div className="mt-8 grid gap-4">
+                <div className="mt-8 flex flex-col gap-4">
                   {[
                     'The BrandPawa Test — see exactly where you stand',
                     'Discovery Quizzes — clarity on every key brand decision',
                     'Guided Growth Challenges — structured execution, not random action',
                     'Automation Tools — consistent brand presence without burnout'
                   ].map((item) => (
-                    <div key={item} className="flex items-start gap-3 rounded-2xl bg-white/10 p-4 text-sm leading-6 text-white/90">
-                      <FiCheck className="mt-1 flex-shrink-0" />
-                      <span>{item}</span>
+                    <div key={item} className="flex items-start gap-4 rounded-2xl bg-white/10 border border-white/5 p-4 backdrop-blur-sm">
+                      <CheckIcon className="h-5 w-5 shrink-0 text-white/90 stroke-[2.5]" />
+                      <span className="text-[0.95rem] leading-relaxed text-white/95">{item}</span>
                     </div>
                   ))}
                 </div>
               </div>
+
             </div>
           </div>
         </div>
