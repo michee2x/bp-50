@@ -5,7 +5,7 @@ import {
   UserIcon,
   LogOutIcon,
   ChevronDownIcon,
-  ViewIcon,
+  MenuIcon,
   XIcon,
   LayoutDashboardIcon,
   ArrowRightIcon,
@@ -332,7 +332,7 @@ export function PublicHeader({
                     <button
                       type="button"
                       onClick={ctaPrimary.onClick}
-                      className="site-primary-button text-sm px-4 py-2 min-h-0 h-9"
+                      className="site-primary-button text-sm px-4 py-2 min-h-0 h-9 whitespace-nowrap shrink-0"
                     >
                       {ctaPrimary.label}
                     </button>
@@ -343,11 +343,11 @@ export function PublicHeader({
               {/* Mobile hamburger — far right, only on mobile */}
               <button
                 type="button"
-                className="nav-icon-btn lg:hidden"
+                className="nav-icon-btn lg:hidden shrink-0"
                 aria-label="Open menu"
                 onClick={() => setMobileOpen(true)}
               >
-                <ViewIcon size={18} />
+                <MenuIcon size={18} />
               </button>
             </div>
 

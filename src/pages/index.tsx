@@ -598,7 +598,7 @@ export default function HomePage() {
                 </div>
 
                 {/* Heading (Launch-UI style: huge, tight, bold) */}
-                <h1 className="w-full text-5xl font-bold tracking-tight text-slate-950 sm:text-6xl lg:text-[3.5rem] xl:text-[4.2rem] lg:leading-[1.1] whitespace-nowrap">
+                <h1 className="w-full text-5xl font-bold tracking-tight text-slate-950 sm:text-6xl lg:text-[3.5rem] xl:text-[4.2rem] lg:leading-[1.1]">
                   Build a Brand that Wins
                 </h1>
 
