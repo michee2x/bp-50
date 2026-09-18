@@ -668,33 +668,33 @@ export default function BrandPersonalityQuiz() {
   if (!authChecked) return <BrandLoader />;
 
   return (
-    <div className="min-h-screen" style={{ background: 'linear-gradient(135deg, #e0f7fe 0%, #f0f9ff 40%, #faf5ff 100%)' }}>
+    <div className="min-h-screen bg-[#FAF0FF]">
       <Head>
         <title>Brand Personality Quiz | BrandPawa</title>
         <meta name="description" content="Discover your brand archetype — the personality that makes your brand magnetic and commands the market." />
       </Head>
 
       {/* Nav */}
-      <nav className="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-cyan-100 shadow-sm">
+      <nav className="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-purple-100 shadow-sm">
         <div className="max-w-3xl mx-auto px-4 py-3 flex items-center justify-between">
           <button
             onClick={() => isLoggedIn ? router.push('/dashboard?section=diagnostics') : router.push('/quizzes')}
-            className="flex items-center gap-2 text-sm font-medium text-gray-600 hover:text-cyan-700 transition"
+            className="flex items-center gap-2 text-sm font-medium text-gray-600 hover:text-purple-700 transition"
           >
             <FiArrowLeft size={16} />
             {isLoggedIn ? 'Back to Dashboard' : 'Back to Quizzes'}
           </button>
-          <span className="text-xs font-bold uppercase tracking-widest text-cyan-600 bg-cyan-50 border border-cyan-200 px-3 py-1 rounded-full">
+          <span className="text-xs font-bold uppercase tracking-widest text-purple-600 bg-purple-50 border border-purple-200 px-3 py-1 rounded-full hidden sm:block">
             Brand Personality
           </span>
           {isLoggedIn ? (
-            <span className="text-xs text-gray-400 font-medium hidden sm:block">
+            <span className="text-xs text-gray-500 font-medium hidden sm:block">
               {userProfile?.full_name || user?.email?.split('@')[0]}
             </span>
           ) : (
             <button
               onClick={() => router.push('/?auth=login')}
-              className="text-xs font-semibold text-cyan-700 hover:underline"
+              className="text-xs font-semibold text-purple-700 hover:underline"
             >
               Log in
             </button>
@@ -715,7 +715,7 @@ export default function BrandPersonalityQuiz() {
         {!showResults && (
           <div>
             <div className="text-center mb-8">
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-cyan-200 bg-cyan-50 text-cyan-700 text-xs font-bold uppercase tracking-widest mb-4">
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-purple-200 bg-purple-50 text-purple-700 text-xs font-bold uppercase tracking-widest mb-4">
                 <FiZap size={11} /> Discovery Quiz · Free
               </div>
               <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 leading-snug">
@@ -734,14 +734,14 @@ export default function BrandPersonalityQuiz() {
               </div>
               <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
                 <div
-                  className="h-full rounded-full transition-all duration-500"
-                  style={{ width: `${progress}%`, background: 'linear-gradient(90deg, #0ABCFE, #7c3aed)' }}
+                  className="h-full rounded-full bg-purple-600 transition-all duration-500"
+                  style={{ width: `${progress}%` }}
                 />
               </div>
             </div>
 
             {/* Question card */}
-            <div className={`rounded-3xl bg-white border border-gray-100 shadow-[0_8px_40px_rgba(10,188,254,0.10)] p-6 sm:p-8 transition-all duration-280 ${animating ? 'opacity-0 translate-y-2' : 'opacity-100 translate-y-0'}`}>
+            <div className={`rounded-3xl bg-white border border-gray-100 shadow-xl p-6 sm:p-8 transition-all duration-280 ${animating ? 'opacity-0 translate-y-2' : 'opacity-100 translate-y-0'}`}>
               <p className="text-base sm:text-lg font-bold text-gray-900 mb-6 leading-snug">
                 {QUESTIONS[currentQuestion].text}
               </p>
@@ -753,21 +753,20 @@ export default function BrandPersonalityQuiz() {
                     <button
                       key={opt.label}
                       onClick={() => handleSelectOption(opt.label)}
-                      className={`group w-full text-left rounded-2xl border-2 px-4 py-3.5 flex items-start gap-3 transition-all duration-200 ${
+                      className={`group w-full text-left rounded-2xl border-2 px-4 py-3.5 flex items-center gap-3 transition-all duration-200 ${
                         isSelected
-                          ? 'border-cyan-500 bg-cyan-50 shadow-md'
-                          : 'border-gray-100 bg-gray-50 hover:border-cyan-300 hover:bg-cyan-50/50'
+                          ? 'border-purple-600 bg-purple-50 shadow-sm'
+                          : 'border-gray-100 bg-white hover:border-purple-200 hover:bg-purple-50/50'
                       }`}
                     >
                       <span
-                        className={`flex-shrink-0 mt-0.5 w-6 h-6 rounded-lg flex items-center justify-center text-xs font-bold transition-all ${
-                          isSelected ? 'text-white' : 'bg-white border border-gray-200 text-gray-400 group-hover:border-cyan-300 group-hover:text-cyan-600'
+                        className={`flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold transition-all ${
+                          isSelected ? 'bg-purple-600 text-white' : 'bg-gray-100 text-gray-400 group-hover:bg-purple-100 group-hover:text-purple-600'
                         }`}
-                        style={isSelected ? { background: 'linear-gradient(135deg, #0ABCFE, #7c3aed)' } : {}}
                       >
                         {isSelected ? <FiCheck size={12} /> : opt.label}
                       </span>
-                      <span className={`text-sm sm:text-base leading-snug ${isSelected ? 'text-cyan-900 font-medium' : 'text-gray-700'}`}>
+                      <span className={`text-sm sm:text-base leading-snug ${isSelected ? 'text-purple-900 font-medium' : 'text-gray-700'}`}>
                         {opt.text}
                       </span>
                     </button>
@@ -786,8 +785,7 @@ export default function BrandPersonalityQuiz() {
                 <button
                   onClick={handleNext}
                   disabled={!selectedOption || animating}
-                  className="flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold text-white disabled:opacity-40 transition-all shadow-sm hover:shadow-md active:scale-[0.97]"
-                  style={selectedOption ? { background: 'linear-gradient(135deg, #0ABCFE, #7c3aed)' } : { backgroundColor: '#e5e7eb', color: '#9ca3af' }}
+                  className="flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold text-white disabled:opacity-40 transition-all shadow-sm hover:shadow-md active:scale-[0.97] bg-purple-600 hover:bg-purple-700"
                 >
                   {currentQuestion < QUESTIONS.length - 1 ? <><span>Next</span> <FiChevronRight size={15} /></> : <><span>See My Results</span> <FiZap size={13} /></>}
                 </button>
@@ -797,7 +795,7 @@ export default function BrandPersonalityQuiz() {
             {!isLoggedIn && (
               <p className="text-center text-xs text-gray-400 mt-5">
                 Already have an account?{' '}
-                <button onClick={() => router.push('/?auth=login')} className="text-cyan-600 font-semibold hover:underline">
+                <button onClick={() => router.push('/?auth=login')} className="text-purple-600 font-semibold hover:underline">
                   Log in to save your results
                 </button>
               </p>
@@ -830,7 +828,8 @@ export default function BrandPersonalityQuiz() {
                   </div>
                 </div>
 
-                <div className="rounded-2xl bg-white border border-gray-100 shadow-sm p-6 mb-4">
+                <div className="rounded-2xl bg-white border border-gray-100 shadow-sm p-6 mb-4 relative overflow-hidden">
+                  <div className="absolute top-0 left-0 w-1 h-full bg-purple-500"></div>
                   <p className="text-gray-800 text-base sm:text-lg font-medium leading-relaxed italic">
                     &ldquo;{primaryMeta.teaserHook}&rdquo;
                   </p>
@@ -873,6 +872,14 @@ export default function BrandPersonalityQuiz() {
                     <h2 className="text-3xl sm:text-4xl font-black tracking-tight mb-2">{positioning.identity.toUpperCase()}</h2>
                     <p className="text-white/75 text-sm leading-relaxed max-w-lg">&ldquo;{positioning.signature}&rdquo;</p>
                   </div>
+                </div>
+
+                {/* Teaser Hook */}
+                <div className="rounded-2xl bg-white border border-gray-100 shadow-sm p-6 mb-4 relative overflow-hidden">
+                  <div className="absolute top-0 left-0 w-1 h-full bg-purple-500"></div>
+                  <p className="text-gray-800 text-base sm:text-lg font-medium leading-relaxed italic">
+                    &ldquo;{primaryMeta.teaserHook}&rdquo;
+                  </p>
                 </div>
 
                 {/* Score bars */}
