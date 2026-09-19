@@ -439,7 +439,7 @@ export default function HomePage() {
           full_name: signupName,
           plan: 'free',
         },
-        emailRedirectTo: `${window.location.origin}/auth/callback`,
+        emailRedirectTo: `${window.location.origin}/auth/verify-email`,
       },
     });
 
