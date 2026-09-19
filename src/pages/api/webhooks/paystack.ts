@@ -57,6 +57,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         const periodEnd = new Date(now);
         periodEnd.setMonth(periodEnd.getMonth() + (billingCycle === 'yearly' ? 12 : 1));
 
+        // Map to DB constraint values ('month' | 'year')
+        const dbInterval = billingCycle === 'yearly' ? 'year' : 'month';
+
         // Update profile
         await supabase
           .from('profiles')
@@ -66,25 +69,47 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           })
           .eq('id', userId);
 
-        // Update subscription
-        await supabase
+        // Update subscription (check first then insert or update)
+        const { data: existingSub } = await supabase
           .from('subscriptions')
-          .upsert({
-            user_id: userId,
-            plan,
-            status: 'active',
-            amount,
-            currency: currency || 'NGN',
-            interval: billingCycle,
-            current_period_start: now.toISOString(),
-            current_period_end: periodEnd.toISOString(),
-            cancel_at_period_end: false,
-            payment_reference: reference,
-            created_at: now.toISOString(),
-            updated_at: now.toISOString()
-          }, {
-            onConflict: 'user_id'
-          });
+          .select('id')
+          .eq('user_id', userId)
+          .maybeSingle();
+
+        if (existingSub) {
+          await supabase
+            .from('subscriptions')
+            .update({
+              plan,
+              status: 'active',
+              amount,
+              currency: currency || 'NGN',
+              interval: dbInterval,
+              current_period_start: now.toISOString(),
+              current_period_end: periodEnd.toISOString(),
+              cancel_at_period_end: false,
+              payment_reference: reference,
+              updated_at: now.toISOString()
+            })
+            .eq('id', existingSub.id);
+        } else {
+          await supabase
+            .from('subscriptions')
+            .insert({
+              user_id: userId,
+              plan,
+              status: 'active',
+              amount,
+              currency: currency || 'NGN',
+              interval: dbInterval,
+              current_period_start: now.toISOString(),
+              current_period_end: periodEnd.toISOString(),
+              cancel_at_period_end: false,
+              payment_reference: reference,
+              created_at: now.toISOString(),
+              updated_at: now.toISOString()
+            });
+        }
 
         // Check and insert invoice
         const { data: existingInvoice } = await supabase

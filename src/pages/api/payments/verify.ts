@@ -97,6 +97,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           const periodEnd = new Date(now);
           periodEnd.setMonth(periodEnd.getMonth() + (billingCycle === 'yearly' ? 12 : 1));
 
+          // Map to DB constraint values ('month' | 'year')
+          const dbInterval = billingCycle === 'yearly' ? 'year' : 'month';
+
           const { error: profileError } = await supabase
             .from('profiles')
             .update({
@@ -107,24 +110,51 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
           if (profileError) throw profileError;
 
-          const { error: subscriptionError } = await supabase
+          const { data: existingSub, error: subCheckError } = await supabase
             .from('subscriptions')
-            .upsert({
-              user_id: userId,
-              plan,
-              status: 'active',
-              amount,
-              currency: response.data.currency || 'NGN',
-              interval: billingCycle,
-              current_period_start: now.toISOString(),
-              current_period_end: periodEnd.toISOString(),
-              cancel_at_period_end: false,
-              payment_reference: reference,
-              created_at: now.toISOString(),
-              updated_at: now.toISOString()
-            }, {
-              onConflict: 'user_id'
-            });
+            .select('id')
+            .eq('user_id', userId)
+            .maybeSingle();
+
+          if (subCheckError) throw subCheckError;
+
+          let subscriptionError;
+          if (existingSub) {
+            const { error } = await supabase
+              .from('subscriptions')
+              .update({
+                plan,
+                status: 'active',
+                amount,
+                currency: response.data.currency || 'NGN',
+                interval: dbInterval,
+                current_period_start: now.toISOString(),
+                current_period_end: periodEnd.toISOString(),
+                cancel_at_period_end: false,
+                payment_reference: reference,
+                updated_at: now.toISOString()
+              })
+              .eq('id', existingSub.id);
+            subscriptionError = error;
+          } else {
+            const { error } = await supabase
+              .from('subscriptions')
+              .insert({
+                user_id: userId,
+                plan,
+                status: 'active',
+                amount,
+                currency: response.data.currency || 'NGN',
+                interval: dbInterval,
+                current_period_start: now.toISOString(),
+                current_period_end: periodEnd.toISOString(),
+                cancel_at_period_end: false,
+                payment_reference: reference,
+                created_at: now.toISOString(),
+                updated_at: now.toISOString()
+              });
+            subscriptionError = error;
+          }
 
           if (subscriptionError) throw subscriptionError;
 
@@ -191,11 +221,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
               billingCycle
             }
           });
-        } catch (dbError) {
+        } catch (dbError: any) {
           console.error('Payment verification database error:', dbError);
           return res.status(500).json({
             success: false,
-            error: 'Payment verified with Paystack, but subscription update failed'
+            error: `Payment verified with Paystack, but subscription update failed: ${dbError.message || JSON.stringify(dbError)}`
           });
         }
       });
