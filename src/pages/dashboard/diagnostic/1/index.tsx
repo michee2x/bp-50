@@ -591,6 +591,39 @@ export default function BrandPawaScoreDiagnostic() {
 
       console.log('History saved:', historyData);
 
+      // --- LIVE BRAND WALL LOGIC (Social Proof & Aspiration) ---
+      // We only broadcast "good" or "great" scores to protect user psychology.
+      // Nobody wants a failing score blasted on the homepage.
+      const userNameForWall = user.user_metadata?.full_name || user.email?.split('@')[0] || 'Brand Builder';
+
+      // 1. Recent Scores (Activity feed) -> Only show scores 60 and above
+      if (score >= 60) {
+        const { error: recentError } = await supabase
+          .from('recent_scores')
+          .insert({
+            user_id: user.id,
+            full_name: userNameForWall,
+            score: score,
+            taken_at: new Date().toISOString()
+          });
+        if (recentError) console.error('Failed to update recent_scores:', recentError);
+      }
+
+      // 2. Weekly Leaderboard (Aspirational) -> Only show elite scores 75 and above
+      if (score >= 75) {
+        // Upsert so if a user takes it twice, we just update their best score for the week
+        const { error: weeklyError } = await supabase
+          .from('weekly_leaderboard')
+          .upsert({
+            user_id: user.id,
+            full_name: userNameForWall,
+            score: score,
+            taken_at: new Date().toISOString()
+          }, { onConflict: 'user_id' }); 
+        if (weeklyError) console.error('Failed to update weekly_leaderboard:', weeklyError);
+      }
+      // ---------------------------------------------------------
+
       setFeedback({ type: 'success', message: 'Results saved successfully. You can now view them in your dashboard.' });
 
     } catch (error: any) {
