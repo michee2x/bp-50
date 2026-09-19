@@ -1255,6 +1255,22 @@ export default function Dashboard() {
           </div>
         </div>
 
+        {/* Upgrade to Pro Banner for Free Users */}
+        {profile?.plan === 'free' && (
+          <div className="bg-gradient-to-r from-purple-100 to-purple-50 border border-purple-200 rounded-xl sm:rounded-2xl p-4 sm:p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div>
+              <h3 className="text-lg sm:text-xl font-bold text-purple-900 mb-1">Upgrade to Pro</h3>
+              <p className="text-sm sm:text-base text-purple-700">Unlock all premium quizzes, activation playbooks, and advanced features.</p>
+            </div>
+            <button
+              onClick={() => router.push('/dashboard/billing')}
+              className="w-full sm:w-auto px-6 py-2.5 bg-purple-600 text-white rounded-xl font-bold hover:bg-purple-700 shadow-sm transition whitespace-nowrap"
+            >
+              View Plans
+            </button>
+          </div>
+        )}
+
         {/* Brand Health Scorecard */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
           <div className="bg-white rounded-xl sm:rounded-2xl shadow-lg p-4 sm:p-6">
