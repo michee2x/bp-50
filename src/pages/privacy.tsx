@@ -11,7 +11,7 @@ export default function PrivacyPolicy() {
     {
       id: 'introduction',
       title: '1. Introduction',
-      content: 'Welcome to BrandPawa ("we," "us," "our"). We are committed to protecting your privacy and ensuring transparency about how we collect, use, and safeguard your personal information. This Privacy Policy explains how BrandPawa collects, uses, discloses, and protects information when you use our website, platform, services, quizzes, tests, challenges, and related offerings (collectively, the "Services").'
+      content: 'Welcome to BrandPawa ("we," "us," "our").We are committed to protecting your privacy and ensuring transparency about how we collect, use, and safeguard your personal information. This Privacy Policy explains how BrandPawa collects, uses, discloses, and protects information when you use our website, platform, services, quizzes, tests, challenges, and related offerings (collectively, the "Services").'
     },
     {
       id: 'information-collected',
