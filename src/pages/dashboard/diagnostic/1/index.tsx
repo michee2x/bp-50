@@ -624,6 +624,20 @@ export default function BrandPawaScoreDiagnostic() {
       }
       // ---------------------------------------------------------
 
+      // Queue post-test email automation
+      fetch('/api/email/queue-post-test', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: user.id,
+          email: user.email,
+          name: userNameForWall,
+          score: score,
+          stage: stage.name,
+          diagnosticId: 1
+        }),
+      }).catch(err => console.error('Failed to queue post-test emails:', err));
+
       setFeedback({ type: 'success', message: 'Results saved successfully. You can now view them in your dashboard.' });
 
     } catch (error: any) {
@@ -840,6 +854,25 @@ export default function BrandPawaScoreDiagnostic() {
       console.error('Download score card error:', error);
       setFeedback({ type: 'error', message: 'We could not save your score card. Please try again.' });
     }
+  };
+
+  const handleChallengeAFriend = async () => {
+    const stage = getScoreStage(totalScore);
+    const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'https://brandpawa.com';
+    const challengeUrl = `${baseUrl}/onboarding?ref=challenge&challenger=${encodeURIComponent(userName || 'A friend')}&score=${totalScore}&stage=${encodeURIComponent(stage.name)}`;
+    const whatsappText = `I scored ${totalScore}/100 on the BrandPawa Brand Test (${stage.name} stage). Think you can beat it? Take the test here: ${challengeUrl}`;
+    const twitterText = `I scored ${totalScore}/100 on the BrandPawa Brand Test 🎯 (${stage.name} stage). Can you beat my score? 👇`;
+
+    try {
+      await navigator.clipboard.writeText(challengeUrl);
+      setFeedback({ type: 'success', message: '✅ Challenge link copied to clipboard! Paste it anywhere to send.' });
+    } catch {
+      // fallback — open WhatsApp
+    }
+
+    // Also open WhatsApp with pre-filled text
+    const wa = `https://wa.me/?text=${encodeURIComponent(whatsappText)}`;
+    window.open(wa, '_blank');
   };
 
   const getScoreColor = (score: number) => {
@@ -1263,6 +1296,47 @@ export default function BrandPawaScoreDiagnostic() {
                   >
                     <FiDownload className="text-xl mb-1" />
                     <span className="text-xs">Save as Image</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Challenge a Friend */}
+              <div className="rounded-2xl border-2 border-dashed border-purple-200 bg-gradient-to-br from-purple-50 to-pink-50 p-6">
+                <div className="flex items-start gap-4">
+                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-purple-600 to-pink-500 text-white shadow-md">
+                    <FiUsers className="text-lg" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-slate-900">Challenge a Friend</h3>
+                    <p className="mt-1 text-sm text-slate-600">
+                      You scored <span className="font-bold text-purple-700">{totalScore}/100</span>. Think they can beat it?
+                    </p>
+                  </div>
+                </div>
+                <div className="mt-5 grid grid-cols-2 gap-3">
+                  <button
+                    onClick={handleChallengeAFriend}
+                    className="flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-purple-600 to-pink-500 px-4 py-3 text-sm font-semibold text-white shadow-md transition hover:scale-[1.02] active:scale-100"
+                  >
+                    <BsWhatsapp className="text-base" />
+                    Send on WhatsApp
+                  </button>
+                  <button
+                    onClick={async () => {
+                      const stage = getScoreStage(totalScore);
+                      const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'https://brandpawa.com';
+                      const challengeUrl = `${baseUrl}/onboarding?ref=challenge&challenger=${encodeURIComponent(userName || 'A friend')}&score=${totalScore}&stage=${encodeURIComponent(stage.name)}`;
+                      try {
+                        await navigator.clipboard.writeText(challengeUrl);
+                        setFeedback({ type: 'success', message: '✅ Challenge link copied! Share it anywhere.' });
+                      } catch {
+                        setFeedback({ type: 'error', message: 'Could not copy link. Please copy it manually.' });
+                      }
+                    }}
+                    className="flex items-center justify-center gap-2 rounded-xl border-2 border-purple-200 bg-white px-4 py-3 text-sm font-semibold text-purple-700 transition hover:border-purple-300 hover:bg-purple-50"
+                  >
+                    <FiShare2 className="text-base" />
+                    Copy Link
                   </button>
                 </div>
               </div>

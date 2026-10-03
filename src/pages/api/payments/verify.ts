@@ -100,15 +100,31 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           // Map to DB constraint values ('month' | 'year')
           const dbInterval = billingCycle === 'yearly' ? 'year' : 'month';
 
-          const { error: profileError } = await supabase
+          console.log('[verify] userId from metadata:', userId, '| plan:', plan);
+
+          const { data: updatedProfiles, error: profileError } = await supabase
             .from('profiles')
             .update({
               plan,
               updated_at: now.toISOString()
             })
-            .eq('id', userId);
+            .eq('id', userId)
+            .select('id, plan');
 
-          if (profileError) throw profileError;
+          if (profileError) {
+            console.error('[verify] profiles update error:', profileError);
+            throw profileError;
+          }
+
+          if (!updatedProfiles || updatedProfiles.length === 0) {
+            console.error('[verify] profiles update matched 0 rows for userId:', userId);
+            return res.status(400).json({
+              success: false,
+              error: `Profile not found for userId: ${userId}. Payment was verified but plan was not updated.`
+            });
+          }
+
+          console.log('[verify] profiles updated successfully:', updatedProfiles[0]);
 
           const { data: existingSub, error: subCheckError } = await supabase
             .from('subscriptions')

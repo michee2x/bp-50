@@ -1,4 +1,5 @@
 // src/pages/index.tsx
+import React from 'react';
 import Link from 'next/link';
 import { useState, FormEvent, useEffect } from 'react';
 import { useRouter } from 'next/router';
@@ -56,6 +57,221 @@ const Modal = ({ isOpen, onClose, children }: any) => {
     );
   };
 
+
+const pricingPlans = [
+  {
+    id: 'free',
+    name: 'Starter',
+    tagline: 'Understand your brand',
+    priceMonthly: 0,
+    priceYearly: 0,
+    cta: 'Start Free',
+    popular: false,
+    color: 'border-slate-200',
+    features: [
+      'Basic BrandPawa Score',
+      'Color Power Quiz',
+      'Brand Personality Quiz',
+      'Limited Results Insight',
+      '7-Day Visibility Challenge',
+      'Basic Dashboard & Email Summary',
+    ],
+  },
+  {
+    id: 'pro',
+    name: 'Growth',
+    tagline: 'Build your brand',
+    priceMonthly: 4999,
+    priceYearly: 49999,
+    cta: 'Upgrade to Growth',
+    popular: true,
+    color: 'border-purple-500',
+    features: [
+      'Everything in Starter',
+      'Full Brand Score Breakdown',
+      'All Quizzes + Core Diagnostics',
+      '14-Day & 30-Day Challenges',
+      'Growth Dashboard (Track Progress)',
+      'Downloadable PDF Reports',
+      'Content & Positioning Guidance',
+    ],
+  },
+  {
+    id: 'enterprise',
+    name: 'Authority',
+    tagline: 'Dominate your category',
+    priceMonthly: 14999,
+    priceYearly: 149999,
+    cta: 'Go Authority',
+    popular: false,
+    color: 'border-slate-200',
+    features: [
+      'Everything in Growth',
+      'Advanced Diagnostics & Authority Engine',
+      'Authority Score System',
+      'Premium Challenges (Authority, Growth)',
+      'Custom Brand Guides & Strategy Insights',
+      'Priority Support',
+    ],
+  },
+];
+
+function PricingSection({ sessionUser, onGetStarted, onUpgrade }: { sessionUser: any; onGetStarted: () => void; onUpgrade: () => void; }) {
+  const [cycle, setCycle] = React.useState<'monthly' | 'yearly'>('monthly');
+
+  return (
+    <section id="pricing" className="site-section bg-slate-50/60">
+      <div className="site-container">
+        <div className="mx-auto max-w-6xl">
+          {/* Header */}
+          <div className="mb-12 text-center">
+            <span className="inline-flex rounded-full bg-purple-100 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-purple-700">
+              Pricing
+            </span>
+            <h2 className="mt-5 text-2xl font-bold sm:text-3xl md:text-4xl">
+              Simple, Transparent Pricing
+            </h2>
+            <p className="mx-auto mt-4 max-w-2xl text-lg text-slate-500">
+              Start free. Upgrade when you&apos;re ready to go deeper.
+            </p>
+
+            {/* Toggle */}
+            <div className="mt-8 inline-flex items-center gap-3 rounded-full border border-slate-200 bg-white p-1.5 shadow-sm">
+              <button
+                onClick={() => setCycle('monthly')}
+                className={`rounded-full px-5 py-2 text-sm font-semibold transition-all ${
+                  cycle === 'monthly'
+                    ? 'bg-slate-950 text-white shadow'
+                    : 'text-slate-500 hover:text-slate-800'
+                }`}
+              >
+                Monthly
+              </button>
+              <button
+                onClick={() => setCycle('yearly')}
+                className={`relative rounded-full px-5 py-2 text-sm font-semibold transition-all ${
+                  cycle === 'yearly'
+                    ? 'bg-slate-950 text-white shadow'
+                    : 'text-slate-500 hover:text-slate-800'
+                }`}
+              >
+                Yearly
+                <span className="absolute -top-2.5 -right-2 rounded-full bg-green-500 px-1.5 py-0.5 text-[0.6rem] font-bold uppercase tracking-wide text-white">
+                  −17%
+                </span>
+              </button>
+            </div>
+          </div>
+
+          {/* Cards */}
+          <div className="grid gap-6 lg:grid-cols-3">
+            {pricingPlans.map((plan) => {
+              const price = cycle === 'monthly' ? plan.priceMonthly : plan.priceYearly;
+              const isGrowth = plan.id === 'pro';
+
+              return (
+                <div
+                  key={plan.id}
+                  className={`relative flex flex-col rounded-3xl border-2 bg-white p-8 shadow-sm transition hover:shadow-md ${plan.color} ${
+                    isGrowth ? 'shadow-purple-100 ring-2 ring-purple-500/20' : ''
+                  }`}
+                >
+                  {isGrowth && (
+                    <div className="absolute -top-4 left-1/2 -translate-x-1/2">
+                      <span className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-purple-600 to-pink-500 px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-white shadow-lg">
+                        <FiAward size={11} />
+                        Most Popular
+                      </span>
+                    </div>
+                  )}
+
+                  <div>
+                    <p className="text-xs font-bold uppercase tracking-[0.2em] text-slate-500">{plan.tagline}</p>
+                    <h3 className="mt-2 text-2xl font-bold text-slate-900">{plan.name}</h3>
+
+                    <div className="mt-5 flex items-end gap-1">
+                      {price === 0 ? (
+                        <span className="text-4xl font-extrabold text-slate-900">Free</span>
+                      ) : (
+                        <>
+                          <span className="text-sm font-semibold text-slate-500 self-start mt-2">₦</span>
+                          <span className="text-4xl font-extrabold text-slate-900">
+                            {price.toLocaleString('en-NG')}
+                          </span>
+                          <span className="mb-1 text-sm text-slate-500">
+                            /{cycle === 'monthly' ? 'mo' : 'yr'}
+                          </span>
+                        </>
+                      )}
+                    </div>
+
+                    {cycle === 'yearly' && price > 0 && (
+                      <p className="mt-1 text-xs text-green-600 font-semibold">
+                        Save ~17% vs monthly
+                      </p>
+                    )}
+                  </div>
+
+                  <ul className="mt-8 flex-1 space-y-3">
+                    {plan.features.map((f) => (
+                      <li key={f} className="flex items-start gap-3 text-sm text-slate-600">
+                        <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-purple-100">
+                          <FiCheck className="h-3 w-3 text-purple-600 stroke-[3]" />
+                        </span>
+                        {f}
+                      </li>
+                    ))}
+                  </ul>
+
+                  <div className="mt-8">
+                    {plan.id === 'free' ? (
+                      <button
+                        onClick={onGetStarted}
+                        className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border-2 border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-900 transition hover:border-slate-300 hover:bg-slate-50"
+                      >
+                        {plan.cta}
+                        <FiArrowRight size={14} />
+                      </button>
+                    ) : (
+                      <button
+                        onClick={onUpgrade}
+                        className={`inline-flex w-full items-center justify-center gap-2 rounded-2xl px-5 py-3 text-sm font-semibold text-white shadow-md transition hover:scale-[1.02] ${
+                          isGrowth
+                            ? 'bg-gradient-to-r from-purple-600 to-pink-500 shadow-purple-200 hover:shadow-purple-300'
+                            : 'bg-slate-950 hover:bg-slate-800'
+                        }`}
+                      >
+                        {plan.cta}
+                        <FiArrowRight size={14} />
+                      </button>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Conversion nudge */}
+          <div className="mt-10 rounded-3xl border border-purple-100 bg-gradient-to-r from-purple-50 to-pink-50 p-6 text-center sm:p-8">
+            <p className="text-sm font-bold uppercase tracking-widest text-purple-700">Why Upgrade?</p>
+            <h3 className="mt-3 text-xl font-bold text-slate-900 sm:text-2xl">
+              Most brands don&apos;t fail because they lack effort.
+            </h3>
+            <p className="mx-auto mt-3 max-w-2xl text-base text-slate-600">
+              They fail because they lack clarity, positioning, and systems. BrandPawa gives you all three.
+            </p>
+            <button
+              onClick={onUpgrade}
+              className="mt-6 inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-purple-600 to-pink-500 px-6 py-3 text-sm font-semibold text-white shadow-md shadow-purple-200 transition hover:scale-[1.02]"
+            >
+              Go Premium <FiArrowRight size={14} />
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
 
   
 export default function HomePage() {
@@ -463,6 +679,13 @@ export default function HomePage() {
 
       if (profileError) {
         console.error('Profile creation error:', profileError);
+      } else {
+        // Queue welcome emails
+        fetch('/api/email/queue-welcome', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId: data.user.id, email: signupEmail, name: signupName }),
+        }).catch(err => console.error('Failed to queue welcome email:', err));
       }
     }
 
@@ -546,6 +769,7 @@ export default function HomePage() {
             ],
           },
           { href: '#how-it-works', label: 'How it Works' },
+          { href: '#pricing', label: 'Pricing' },
           { href: '#about-us', label: 'About Us' },
           { href: '#blog', label: 'Blog' },
           {
@@ -848,6 +1072,9 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* Pricing */}
+      <PricingSection sessionUser={sessionUser} onGetStarted={() => { if (sessionUser) { router.push('/dashboard/billing'); } else { router.push('/onboarding'); } }} onUpgrade={() => { if (sessionUser) { router.push('/dashboard/billing'); } else { setAuthModalTab('signup'); setIsAuthModalOpen(true); } }} />
 
       {/* Who is BrandPawa For */}
       <section className="site-section bg-gradient-to-b from-gray-50 to-white">
