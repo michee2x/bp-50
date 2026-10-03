@@ -126,6 +126,20 @@ export default function OnboardingDiagnostic() {
   const [totalScore, setTotalScore] = useState(0);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [shareSuccess, setShareSuccess] = useState(false);
+  const [challenger, setChallenger] = useState<{ name: string; score: string; stage: string } | null>(null);
+
+  // Check for challenge referral params
+  useEffect(() => {
+    if (!router.isReady) return;
+    const { ref, challenger: challengerName, score, stage } = router.query;
+    if (ref === 'challenge' && challengerName && score) {
+      setChallenger({
+        name: decodeURIComponent(String(challengerName)),
+        score: String(score),
+        stage: stage ? decodeURIComponent(String(stage)) : '',
+      });
+    }
+  }, [router.isReady, router.query]);
 
   useEffect(() => {
     // Check auth state
@@ -234,6 +248,23 @@ export default function OnboardingDiagnostic() {
           <title>BrandPawa Score | Free Assessment</title>
         </Head>
         <div className="w-full max-w-3xl">
+          {/* Challenge banner */}
+          {challenger && (
+            <div className="mb-6 flex items-center gap-3 rounded-2xl border border-purple-200 bg-white/80 px-5 py-4 shadow-sm backdrop-blur">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-purple-600 to-pink-500 text-white text-lg">
+                🎯
+              </div>
+              <div>
+                <p className="text-sm font-bold text-slate-900">
+                  {challenger.name} challenged you!
+                </p>
+                <p className="text-xs text-slate-500">
+                  They scored <span className="font-bold text-purple-700">{challenger.score}/100</span>
+                  {challenger.stage ? ` (${challenger.stage})` : ''}. Beat their score to win.
+                </p>
+              </div>
+            </div>
+          )}
           <div className="mb-8 flex items-center justify-between">
             <div className="flex items-center space-x-2">
               <BrandPawaLogo className="h-8 w-auto text-purple-600" />
