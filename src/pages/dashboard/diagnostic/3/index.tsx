@@ -19,7 +19,7 @@ import {
   FiArrowLeft, FiArrowRight, FiCheck, FiChevronRight,
   FiDownload, FiShare2, FiLock, FiUnlock, FiX,
   FiZap, FiAlertCircle, FiStar, FiTrendingUp,
-  FiTwitter, FiLinkedin, FiEye, FiEyeOff,
+  FiTwitter, FiLinkedin, FiFacebook, FiEye, FiEyeOff,
   FiRefreshCw,
 } from 'react-icons/fi';
 import { BsWhatsapp } from 'react-icons/bs';
@@ -481,6 +481,22 @@ export default function BrandPersonalityQuiz() {
   const handleSelectOption = (label: string) => {
     if (animating) return;
     setSelectedOption(label);
+    // Auto-advance to next question after a brief moment so selection is visible
+    setTimeout(() => {
+      const qId = QUESTIONS[currentQuestion].id;
+      const newAnswers = { ...answers, [qId]: label };
+      setAnswers(newAnswers);
+      setAnimating(true);
+      setSelectedOption(null);
+      setTimeout(() => {
+        setAnimating(false);
+        if (currentQuestion < QUESTIONS.length - 1) {
+          setCurrentQuestion(prev => prev + 1);
+        } else {
+          finalizeQuiz(newAnswers);
+        }
+      }, 280);
+    }, 350);
   };
 
   const handleNext = () => {
@@ -634,7 +650,7 @@ export default function BrandPersonalityQuiz() {
     }
   };
 
-  const handleSocialShare = (platform: 'twitter' | 'linkedin' | 'whatsapp') => {
+  const handleSocialShare = (platform: 'twitter' | 'linkedin' | 'whatsapp' | 'facebook') => {
     if (!primaryKey || !secondaryKey) return;
     const pairKey = `${primaryKey}_${secondaryKey}` as PairKey;
     const positioning = POSITIONING_MATRIX[pairKey] || { identity: 'Brand', signature: '' };
@@ -831,7 +847,7 @@ export default function BrandPersonalityQuiz() {
                 <div className="rounded-2xl bg-white border border-gray-100 shadow-sm p-6 mb-4 relative overflow-hidden">
                   <div className="absolute top-0 left-0 w-1 h-full bg-purple-500"></div>
                   <p className="text-gray-800 text-base sm:text-lg font-medium leading-relaxed italic">
-                    &ldquo;{primaryMeta.teaserHook}&rdquo;
+                    {primaryMeta.teaserHook}
                   </p>
                 </div>
 
@@ -870,7 +886,7 @@ export default function BrandPersonalityQuiz() {
                       <span className="px-3 py-1 rounded-full bg-white/10 border border-white/15 text-white/70 text-xs font-bold uppercase tracking-widest">+ {secondaryMeta.label}</span>
                     </div>
                     <h2 className="text-3xl sm:text-4xl font-black tracking-tight mb-2">{positioning.identity.toUpperCase()}</h2>
-                    <p className="text-white/75 text-sm leading-relaxed max-w-lg">&ldquo;{positioning.signature}&rdquo;</p>
+                    <p className="text-white/75 text-sm leading-relaxed max-w-lg">{positioning.signature}</p>
                   </div>
                 </div>
 
@@ -878,7 +894,7 @@ export default function BrandPersonalityQuiz() {
                 <div className="rounded-2xl bg-white border border-gray-100 shadow-sm p-6 mb-4 relative overflow-hidden">
                   <div className="absolute top-0 left-0 w-1 h-full bg-purple-500"></div>
                   <p className="text-gray-800 text-base sm:text-lg font-medium leading-relaxed italic">
-                    &ldquo;{primaryMeta.teaserHook}&rdquo;
+                    {primaryMeta.teaserHook}
                   </p>
                 </div>
 
@@ -1242,6 +1258,12 @@ export default function BrandPersonalityQuiz() {
                 className="flex items-center gap-3 px-4 py-3 rounded-xl bg-blue-50 border border-blue-200 text-blue-700 text-sm font-semibold hover:bg-blue-100 transition"
               >
                 <FiLinkedin size={16} /> Share on LinkedIn
+              </button>
+              <button
+                onClick={() => handleSocialShare('facebook')}
+                className="flex items-center gap-3 px-4 py-3 rounded-xl bg-blue-50 border border-blue-200 text-blue-600 text-sm font-semibold hover:bg-blue-100 transition"
+              >
+                <FiFacebook size={16} /> Share on Facebook
               </button>
               <button
                 onClick={() => handleSocialShare('whatsapp')}

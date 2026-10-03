@@ -1883,39 +1883,42 @@ export default function ColorPowerMatrixDiagnostic() {
             </div>
           </div>
           
-          <div className="mt-6 bg-white rounded-xl sm:rounded-2xl shadow-lg p-4 sm:p-6">
-            <div className="mb-4 flex items-center justify-between gap-3 sm:mb-6">
-              <h3 className="text-lg sm:text-xl font-bold">Color Psychology Reference</h3>
-              {!isProUser && (
-                <span className="rounded-full bg-purple-100 px-3 py-1 text-xs font-semibold text-purple-600">
-                  Pro Feature
-                </span>
+          {/* Color Psychology Reference — hidden from users, kept as internal reference */}
+          <div className="hidden">
+            <div className="mt-6 bg-white rounded-xl sm:rounded-2xl shadow-lg p-4 sm:p-6">
+              <div className="mb-4 flex items-center justify-between gap-3 sm:mb-6">
+                <h3 className="text-lg sm:text-xl font-bold">Color Psychology Reference</h3>
+                {!isProUser && (
+                  <span className="rounded-full bg-purple-100 px-3 py-1 text-xs font-semibold text-purple-600">
+                    Pro Feature
+                  </span>
+                )}
+              </div>
+              {isProUser ? (
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
+                  {Object.entries(colorInfo).map(([color, info]) => (
+                    <div key={color} className="border border-gray-200 rounded-lg sm:rounded-xl p-3">
+                      <div className={`w-full h-10 sm:h-12 rounded-lg mb-2 ${getColorClass(color)}`}></div>
+                      <div className="font-bold text-xs sm:text-sm mb-1 truncate">{info.name}</div>
+                      <div className="text-xs text-gray-600 mb-1 line-clamp-2">{info.fullName}</div>
+                      <div className="text-xs text-gray-500 line-clamp-2">{info.emotion}</div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="rounded-2xl bg-gradient-to-r from-purple-50 to-pink-50 p-4 sm:p-5">
+                  <p className="text-sm text-gray-700">
+                    Go Premium to unlock the full color psychology library and reference guidance.
+                  </p>
+                  <button
+                    onClick={() => router.push('/dashboard?section=billing')}
+                    className="mt-3 rounded-lg bg-gradient-to-r from-purple-500 to-pink-500 px-4 py-2 text-sm font-semibold text-white transition hover:shadow-lg"
+                  >
+                    Go Premium
+                  </button>
+                </div>
               )}
             </div>
-            {isProUser ? (
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
-                {Object.entries(colorInfo).map(([color, info]) => (
-                  <div key={color} className="border border-gray-200 rounded-lg sm:rounded-xl p-3">
-                    <div className={`w-full h-10 sm:h-12 rounded-lg mb-2 ${getColorClass(color)}`}></div>
-                    <div className="font-bold text-xs sm:text-sm mb-1 truncate">{info.name}</div>
-                    <div className="text-xs text-gray-600 mb-1 line-clamp-2">{info.fullName}</div>
-                    <div className="text-xs text-gray-500 line-clamp-2">{info.emotion}</div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="rounded-2xl bg-gradient-to-r from-purple-50 to-pink-50 p-4 sm:p-5">
-                <p className="text-sm text-gray-700">
-                  Go Premium to unlock the full color psychology library and reference guidance.
-                </p>
-                <button
-                  onClick={() => router.push('/dashboard?section=billing')}
-                  className="mt-3 rounded-lg bg-gradient-to-r from-purple-500 to-pink-500 px-4 py-2 text-sm font-semibold text-white transition hover:shadow-lg"
-                >
-                  Go Premium
-                </button>
-              </div>
-            )}
           </div>
         </div>
         
