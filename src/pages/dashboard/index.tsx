@@ -1674,7 +1674,7 @@ export default function Dashboard() {
                       ) : (
                         <div className="flex items-center justify-between">
                           <span className="text-xs sm:text-sm text-gray-600">Your Result</span>
-                          {diag.id === 3 && result.result_data?.positioning_identity ? (
+                          {diag.id === '3' && result.result_data?.positioning_identity ? (
                             <span className="font-bold text-xs sm:text-sm text-purple-700 text-right max-w-[55%] leading-tight">
                               {result.result_data.positioning_identity}
                             </span>
