@@ -57,13 +57,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
-    // Fetch due pending emails
+    // Fetch due pending emails — using real DB column names
     const { data: due, error: fetchError } = await supabase
       .from('email_notifications')
       .select('*')
       .eq('status', 'pending')
-      .lte('scheduled_at', new Date().toISOString())
-      .order('scheduled_at', { ascending: true })
+      .lte('scheduled_for', new Date().toISOString())
+      .order('scheduled_for', { ascending: true })
       .limit(BATCH_LIMIT);
 
     if (fetchError) throw fetchError;
@@ -74,22 +74,25 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const results: { id: string; email_key: string; status: string; error?: string }[] = [];
 
     for (const row of due) {
-      const template = resolveTemplate(row.email_key, row.name, row.metadata);
+      // Pull name and email_key from metadata (where queue-* routes store them)
+      const name: string = row.metadata?.user_name ?? row.name ?? 'there';
+      const emailKey: string = row.metadata?.email_key ?? row.email_key ?? '';
+      const template = resolveTemplate(emailKey, name, row.metadata);
 
       if (!template) {
         // Unknown key — mark as failed so it doesn't block the queue
         await supabase
           .from('email_notifications')
-          .update({ status: 'failed', sent_at: new Date().toISOString(), error: 'Unknown email_key' })
+          .update({ status: 'failed', sent_at: new Date().toISOString(), error_message: 'Unknown email_key' })
           .eq('id', row.id);
-        results.push({ id: row.id, email_key: row.email_key, status: 'failed', error: 'Unknown email_key' });
+        results.push({ id: row.id, email_key: emailKey, status: 'failed', error: 'Unknown email_key' });
         continue;
       }
 
       try {
         const { error: sendError } = await resend.emails.send({
           from: FROM,
-          to: row.email,
+          to: row.email_to,
           subject: template.subject,
           html: template.html,
         });
@@ -98,17 +101,23 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
         await supabase
           .from('email_notifications')
-          .update({ status: 'sent', sent_at: new Date().toISOString() })
+          .update({
+            status: 'sent',
+            sent_at: new Date().toISOString(),
+            email_subject: template.subject,
+            email_body: template.html,
+            updated_at: new Date().toISOString(),
+          })
           .eq('id', row.id);
 
-        results.push({ id: row.id, email_key: row.email_key, status: 'sent' });
+        results.push({ id: row.id, email_key: emailKey, status: 'sent' });
       } catch (sendErr: any) {
         const errMsg = sendErr?.message ?? String(sendErr);
         await supabase
           .from('email_notifications')
-          .update({ status: 'failed', sent_at: new Date().toISOString(), error: errMsg })
+          .update({ status: 'failed', sent_at: new Date().toISOString(), error_message: errMsg, updated_at: new Date().toISOString() })
           .eq('id', row.id);
-        results.push({ id: row.id, email_key: row.email_key, status: 'failed', error: errMsg });
+        results.push({ id: row.id, email_key: emailKey, status: 'failed', error: errMsg });
       }
     }
 

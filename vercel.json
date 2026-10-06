@@ -3,6 +3,10 @@
     {
       "path": "/api/email/process-queue",
       "schedule": "0 0 * * *"
+    },
+    {
+      "path": "/api/email/queue-inactive",
+      "schedule": "0 1 * * *"
     }
   ]
 }

@@ -43,3 +43,5 @@ next-env.d.ts
 # documentation
 brandpawa-documentation.md
 roadmap.md
+
+.vercel

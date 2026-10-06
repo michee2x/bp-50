@@ -31,7 +31,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       .from('email_notifications')
       .select('*', { count: 'exact', head: true })
       .eq('user_id', userId)
-      .eq('flow', 'welcome');
+      .eq('email_type', 'welcome');
 
     if (count && count > 0) {
       return res.status(200).json({ skipped: true, message: 'Welcome flow already queued' });
@@ -45,11 +45,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     const rows = emails.map(({ send_at, email_key }) => ({
       user_id: userId,
-      email,
-      name,
-      flow: 'welcome',
-      email_key,
-      scheduled_at: send_at,
+      email_to: email,
+      email_type: 'welcome',
+      email_subject: '',        // filled by process-queue from template
+      email_body: '',           // filled by process-queue from template
+      metadata: { user_name: name, email_key },
+      scheduled_for: send_at,
       status: 'pending',
       created_at: new Date().toISOString(),
     }));

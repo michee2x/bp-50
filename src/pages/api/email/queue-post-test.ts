@@ -31,7 +31,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       .from('email_notifications')
       .delete()
       .eq('user_id', userId)
-      .eq('flow', 'post_test')
+      .eq('email_type', 'post_test')
       .eq('status', 'pending');
 
     const emails = [
@@ -42,13 +42,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     const rows = emails.map(({ send_at, email_key }) => ({
       user_id: userId,
-      email,
-      name,
-      flow: 'post_test',
-      email_key,
+      email_to: email,
+      email_type: 'post_test',
+      email_subject: '',      // filled by process-queue from template
+      email_body: '',         // filled by process-queue from template
       // Store score + stage so the processor can personalise the email
-      metadata: { score, stage, diagnosticId: diagnosticId ?? 1 },
-      scheduled_at: send_at,
+      metadata: { user_name: name, email_key, score, stage, diagnosticId: diagnosticId ?? 1 },
+      scheduled_for: send_at,
       status: 'pending',
       created_at: new Date().toISOString(),
     }));
