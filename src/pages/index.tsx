@@ -655,12 +655,23 @@ export default function HomePage() {
           full_name: signupName,
           plan: 'free',
         },
-        emailRedirectTo: `${window.location.origin}/auth/verify-email`,
+        emailRedirectTo: `${process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, '') || window.location.origin}/auth/callback`,
       },
     });
 
     if (error) {
-      setAuthError(error.message);
+      // Supabase rate-limits its built-in email provider (2/hr on free plan).
+      // Map this to a friendlier message until custom SMTP is configured.
+      if (
+        error.message.toLowerCase().includes('sending confirmation email') ||
+        error.message.toLowerCase().includes('error sending') ||
+        error.message.toLowerCase().includes('rate limit') ||
+        error.message.toLowerCase().includes('email') && error.status === 500
+      ) {
+        setAuthError('We\'re having trouble sending your confirmation email right now. Please try again in a few minutes, or contact support if this keeps happening.');
+      } else {
+        setAuthError(error.message);
+      }
       setLoading(false);
       return;
     }
