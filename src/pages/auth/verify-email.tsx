@@ -14,13 +14,53 @@ export default function VerifyEmail() {
   const [tokenType, setTokenType] = useState('');
 
   useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    // ── Implicit flow ────────────────────────────────────────────────────────
+    // Supabase verified the token server-side and redirected here with
+    // #access_token=... in the URL fragment. supabase-js v2 detects this
+    // automatically via detectSessionInUrl. We just need to read the session
+    // and forward the user to the dashboard.
+    const hash = window.location.hash;
+    if (hash.includes('access_token=')) {
+      setStage('verifying');
+
+      const trySession = async () => {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session) {
+          setStage('success');
+          setTimeout(() => router.replace('/dashboard'), 1500);
+          return;
+        }
+        // Session not parsed yet — wait for the auth state change
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((event, newSession) => {
+          if ((event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') && newSession) {
+            subscription.unsubscribe();
+            setStage('success');
+            setTimeout(() => router.replace('/dashboard'), 1500);
+          }
+        });
+        // Timeout fallback after 6 s
+        setTimeout(() => {
+          subscription.unsubscribe();
+          setErrorMsg('Session could not be established. Please try signing in.');
+          setStage('error');
+        }, 6000);
+      };
+
+      trySession();
+      return; // don't fall through to PKCE path
+    }
+
+    // ── PKCE flow ────────────────────────────────────────────────────────────
+    // Email link has ?token_hash= and ?type= as query params.
     if (!router.isReady) return;
     const { token_hash, type } = router.query;
     if (token_hash && type) {
       setTokenHash(token_hash as string);
       setTokenType(type as string);
     }
-  }, [router.isReady, router.query]);
+  }, [router.isReady, router.query]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleVerify = async () => {
     if (!tokenHash || !tokenType) {
