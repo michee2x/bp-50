@@ -49,7 +49,7 @@ export default function V2Layout({
       </Head>
 
       <div
-        className={`${dmSans.variable} ${fraunces.variable} ${dmSans.className}`}
+        className={`v2-page ${dmSans.variable} ${fraunces.variable} ${dmSans.className}`}
         style={{ minHeight: '100vh' }}
       >
         {children}

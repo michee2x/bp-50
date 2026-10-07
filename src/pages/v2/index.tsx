@@ -17,8 +17,7 @@ import LearnSection from '@/components/v2/LearnSection';
 import FinalCTASection from '@/components/v2/FinalCTASection';
 import CustomCursor from '@/components/v2/CustomCursor';
 
-// Import v2-specific styles (isolated — does NOT affect the main site)
-import '@/styles/v2/tailwind.css';
+// V2-specific styles are now imported globally in _app.tsx and scoped via .v2-page
 
 const structuredDataApp = {
   '@context': 'https://schema.org',

@@ -5,6 +5,7 @@ import { AuthProvider } from '../components/AuthProvider';
 import PwaManager from '../components/PwaManager';
 import { initializeDatabase } from '../lib/initDatabase';
 import '../styles/globals.css';
+import '../styles/v2/tailwind.css'; // Scoped under .v2-page
 
 import Head from 'next/head';
 
