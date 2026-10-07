@@ -1,5 +1,28 @@
 /* Scoped V2 styles */
 
+/* Variables at :root so Tailwind v4 @theme inline can resolve them */
+:root {
+  --background: #FAFAF8;
+  --foreground: #1A1A1A;
+  --primary: #0D0D0D;
+  --primary-foreground: #FAFAF8;
+  --secondary: #F4F1EA;
+  --secondary-foreground: #1A1A1A;
+  --accent: #D4A853;
+  --accent-foreground: #0D0D0D;
+  --muted: #F0EDE6;
+  --muted-foreground: #6B6660;
+  --card: #FFFFFF;
+  --card-foreground: #1A1A1A;
+  --border: #E5E1D8;
+  --input: #E5E1D8;
+  --ring: #D4A853;
+  --radius: 0.75rem;
+  --font-sans: 'DM Sans', sans-serif;
+  --font-serif: 'Fraunces', serif;
+}
+
+/* Also scoped under .v2-page for isolation */
 .v2-page {
   --background: #FAFAF8;
   --foreground: #1A1A1A;

@@ -79,7 +79,8 @@ export default function SocialProofSection() {
         <div
           ref={founderRef}
           id="about"
-          className="grid lg:grid-cols-2 gap-12 items-center bg-primary text-primary-foreground rounded-3xl p-10 lg:p-14"
+          className="grid lg:grid-cols-2 gap-12 items-center rounded-3xl p-10 lg:p-14"
+          style={{ backgroundColor: 'var(--primary)', color: 'var(--primary-foreground)' }}
         >
           <div>
             <p className="text-xs font-bold tracking-widest uppercase text-white/40 mb-6">From The Founder&apos;s Desk</p>

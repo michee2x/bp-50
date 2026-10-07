@@ -131,7 +131,7 @@ export default function PricingSection() {
             Simple, <span className="italic">Transparent</span> Pricing
           </h2>
           <p className="text-base text-muted-foreground max-w-md mx-auto mb-8">
-            Start free. Upgrade when you&apos;re ready to go deeper.
+            Start free. Upgrade when you're ready to go deeper.
           </p>
 
           {/* Billing toggle */}
@@ -236,11 +236,11 @@ export default function PricingSection() {
         </div>
 
         {/* Why Upgrade banner */}
-        <div className="bg-primary text-primary-foreground rounded-2xl p-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+        <div className="rounded-2xl p-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-6" style={{ backgroundColor: 'var(--primary)', color: 'var(--primary-foreground)' }}>
           <div>
             <p className="text-xs font-bold tracking-widest uppercase text-white/40 mb-2">Why Upgrade?</p>
             <p className="text-base text-white/80 font-light max-w-xl leading-relaxed">
-              Most brands don&apos;t fail because they lack effort. They fail because they lack clarity, positioning, and systems. BrandPawa gives you all three.
+              Most brands don't fail because they lack effort. They fail because they lack clarity, positioning, and systems. BrandPawa gives you all three.
             </p>
           </div>
           <Link

@@ -104,14 +104,14 @@ export default function WhyBrandPawaSection() {
   }, []);
 
   return (
-    <section id="why" className="py-28 px-6 bg-primary text-primary-foreground">
+    <section id="why" className="py-28 px-6" style={{ backgroundColor: 'var(--primary)', color: 'var(--primary-foreground)' }}>
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-16">
           <p className="text-xs font-bold tracking-widest uppercase text-white/40 mb-4">Why BrandPawa</p>
           <h2 className="text-section-xl font-serif font-light leading-none max-w-3xl">
-            You&apos;re Doing the Work.{' '}
-            <span className="italic gold-gradient-text">So Why Isn&apos;t It Working?</span>
+            You're Doing the Work.{' '}
+            <span className="italic gold-gradient-text">So Why Isn't It Working?</span>
           </h2>
         </div>
 
@@ -124,7 +124,7 @@ export default function WhyBrandPawaSection() {
                 <p className="text-sm font-semibold text-white/50 uppercase tracking-widest">The Problem</p>
               </div>
               <p className="text-xl font-light text-white/70 leading-relaxed mb-10">
-                Most brands are active but not aligned. Most brands don&apos;t know:
+                Most brands are active but not aligned. Most brands don't know:
               </p>
               <div>
                 {problems.map((p, i) => (
@@ -145,7 +145,7 @@ export default function WhyBrandPawaSection() {
             {/* Pull quote */}
             <div className="mt-10 p-6 rounded-2xl border border-white/10 bg-white/5">
               <p className="text-sm text-white/50 font-light leading-relaxed italic">
-                &ldquo;Most brands don&apos;t fail because they lack effort. They fail because they lack clarity, positioning, and systems.&rdquo;
+                {`"Most brands don't fail because they lack effort. They fail because they lack clarity, positioning, and systems."`}
               </p>
             </div>
           </div>
