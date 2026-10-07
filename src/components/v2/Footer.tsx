@@ -1,6 +1,5 @@
 import React from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 
 export default function Footer() {
   return (
@@ -11,7 +10,7 @@ export default function Footer() {
           {/* Left: Logo + tagline */}
           <div className="flex flex-col gap-2">
             <Link href="/">
-              <Image
+              <img
                 src="https://www.brandpawa.com/_next/image?url=%2Fimages%2FBrandPawa%20logo2.png&w=384&q=75"
                 alt="BrandPawa logo"
                 width={120}

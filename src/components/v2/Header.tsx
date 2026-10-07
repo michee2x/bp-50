@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 
 const productLinks = [
   { label: 'BrandPawa Test', href: '#ecosystem' },
@@ -86,12 +85,11 @@ export default function Header() {
         <nav className="max-w-7xl mx-auto px-6 flex items-center justify-between">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 shrink-0">
-            <Image
+            <img
               src="https://www.brandpawa.com/_next/image?url=%2Fimages%2FBrandPawa%20logo2.png&w=384&q=75"
               alt="BrandPawa logo — brand operating system"
               width={140}
               height={36}
-              priority
               className="h-8 w-auto object-contain"
             />
           </Link>

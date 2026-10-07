@@ -1,5 +1,4 @@
 import React, { useEffect, useRef } from 'react';
-import Image from 'next/image';
 
 const logos = [
   { src: 'https://www.brandpawa.com/logos/emeka-nobis-logo.png', alt: 'Emeka Nobis logo — trusted BrandPawa partner' },
@@ -67,11 +66,9 @@ export default function SocialProofSection() {
               key={i}
               className="flex items-center justify-center p-4 bg-card border border-border rounded-xl hover:border-accent transition-colors duration-300 h-16"
             >
-              <Image
+              <img
                 src={logo.src}
                 alt={logo.alt}
-                width={100}
-                height={40}
                 className="max-h-8 w-auto object-contain grayscale hover:grayscale-0 transition-all duration-500 opacity-60 hover:opacity-100"
               />
             </div>

@@ -1,6 +1,5 @@
 import React, { useEffect, useRef } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 
 // ─── Inline SVG icons ────────────────────────────────────────────────────────
 function ArrowRightIcon({ size = 16, className }: { size?: number; className?: string }) {
@@ -117,14 +116,12 @@ export default function BlogSection() {
             href={featured.href}
             className="grid md:grid-cols-2 gap-0 rounded-2xl overflow-hidden border border-border hover:border-accent transition-colors duration-300 bg-card"
           >
-            {/* Featured image — relative wrapper required for next/image fill */}
-            <div className="blog-card-img relative aspect-video md:aspect-auto min-h-[240px]">
-              <Image
+            {/* Featured image */}
+            <div className="blog-card-img relative aspect-video md:aspect-auto min-h-[240px] overflow-hidden">
+              <img
                 src={featured.image}
                 alt={`${featured.title} — blog article cover`}
-                fill
-                sizes="(max-width: 768px) 100vw, 50vw"
-                className="object-cover"
+                className="w-full h-full object-cover absolute inset-0"
               />
             </div>
             <div className="p-8 md:p-10 flex flex-col justify-between">
@@ -160,11 +157,9 @@ export default function BlogSection() {
                 className="block rounded-xl overflow-hidden border border-border hover:border-accent transition-colors duration-300 bg-card h-full flex flex-col"
               >
                 <div className="blog-card-img aspect-video overflow-hidden">
-                  <Image
+                  <img
                     src={article.image}
                     alt={`${article.title} — article cover`}
-                    width={400}
-                    height={225}
                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                   />
                 </div>
