@@ -691,12 +691,20 @@ export default function HomePage() {
       if (profileError) {
         console.error('Profile creation error:', profileError);
       } else {
-        // Queue welcome emails
-        fetch('/api/email/queue-welcome', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ userId: data.user.id, email: signupEmail, name: signupName }),
-        }).catch(err => console.error('Failed to queue welcome email:', err));
+        // Queue welcome emails — awaited so failures appear in Vercel logs
+        try {
+          const welcomeRes = await fetch('/api/email/queue-welcome', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userId: data.user.id, email: signupEmail, name: signupName }),
+          });
+          if (!welcomeRes.ok) {
+            const errBody = await welcomeRes.text();
+            console.error('queue-welcome failed:', welcomeRes.status, errBody);
+          }
+        } catch (err) {
+          console.error('Failed to queue welcome email:', err);
+        }
       }
     }
 

@@ -46,12 +46,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  // Protect with a shared secret so only Vercel Cron (or you) can trigger it
-  const secret = req.headers['x-cron-secret'] ?? req.query.secret;
-  if (secret !== process.env.CRON_SECRET) {
-    return res.status(401).json({ error: 'Unauthorized' });
-  }
-
   if (!process.env.RESEND_API_KEY || process.env.RESEND_API_KEY.includes('PLACEHOLDER')) {
     return res.status(500).json({ error: 'RESEND_API_KEY is not configured. Add it to your environment variables.' });
   }
